@@ -8,6 +8,9 @@ namespace Lab1Models
 {
     public static class CryptoAlgorithRSA
     {
+        static uint p = 0;
+        static uint q = 0;
+
 
     }
 }
