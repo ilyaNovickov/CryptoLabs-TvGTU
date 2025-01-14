@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MathExtra.cs" />
     <Compile Include="Reciever.cs" />
     <Compile Include="Sender.cs" />
     <Compile Include="CryptoAlgorithRSA.cs" />
