@@ -14,9 +14,9 @@ namespace Lab1Models
 
         static uint p = 0;
         static uint q = 0;
-        static ulong n = 0;
-        static uint d = 0;
-        static uint e = 0;
+        static long n = 0;
+        static long d = 0;
+        static long e = 0;
 
         static bool useFileofPrimeNumbers = false;
         static ulong endofPrimeNumberRange = byte.MaxValue;
@@ -37,9 +37,9 @@ namespace Lab1Models
         /// Генерация файла со списком простых чисел
         /// </summary>
         /// <param name="endRange">Конец диапазона простых чисел для генерации</param>
-        public static void GeneratePrimeNumberFile(ulong endRange)
+        public static void GeneratePrimeNumberFile(long endRange)
         {
-            List<ulong> list = MathExtra.FindPrimesInRange(0UL, endRange);
+            List<long> list = MathExtra.FindPrimesInRange(0L, endRange);
 
             FileStream streamWriter = new FileStream(precompiledFile, FileMode.Create, FileAccess.Write);
             BinaryFormatter binaryFormatter = new BinaryFormatter();
@@ -70,45 +70,76 @@ namespace Lab1Models
             }
             */
 
-#if DEBUG
+
             Random rnd = new Random(880035353);
+            sign:
+            do
+            {
+                p = rnd.NextUint(0U, byte.MaxValue);
+            } while (!MathExtra.IsPrime(p));
 
-            p = 61;
-            q = 53;
-
+            do
+            {
+                q = rnd.NextUint(0U, byte.MaxValue);
+            } while (!MathExtra.IsPrime(p));
+            
             n = p * q;
 
-            ulong eln = (ulong)(p - 1) * (ulong)(q - 1);
+            if (n <= byte.MaxValue)
+                goto sign;
 
-            e = 17;
-            d = 2753;
+            long eln = (long)(p - 1) * (long)(q - 1);
+
+            do
+            {
+                e = rnd.NextUint(0U, uint.MaxValue);
+            } while (!MathExtra.FindMutuallyPrimeNumbers(e, eln) || !(1 < e && e < eln));
 
             //do
             //{
-            //    e = (uint)rnd.Next(0, int.MaxValue);
-            //} while (MathExtra.FindMutuallyPrimeNumbers(d, eln));
+            //    d = rnd.NextUint(0U, uint.MaxValue);
+            //} while ((e * d) % eln == 1);
+            //d = foo(eln, e);
+            {
+                MathExtra.ExtendedEvklidAlgorithm(eln, e, out long x, out long y);
 
-            //do
-            //{
-            //    d = (uint)rnd.Next(0, int.MaxValue);
-            //} while ((d * e) % eln == 1);
-            
+                long min = Math.Min(x, y);
 
-            ulong[] message = new ulong[] { 74, 74, 2325, 675};
-            ulong[] crM = new ulong[message.Length];
-            ulong[] decrM = new ulong[message.Length];
+                d = eln - Math.Abs(min);
+            }
+
+
+
+            string message = testMess;
+            long[] crM = new long[message.Length];
+            long[] decrM = new long[message.Length];
+            string decrMess = "";
 
             for (int i = 0; i < message.Length; i++)
             {
                 crM[i] = MathExtra.ModularExponentiation(message[i], e, n);
                 decrM[i] = MathExtra.ModularExponentiation(crM[i], d, n);
+                decrMess += ((char)decrM[i]);
             }
-
-            int w = 1;
-#else
-            Random rnd = new Random();
-#endif
-
         }
+
+
+        static string testMess = "Древнегреческие математики называли этот алгоритм ἀνθυφαίρεσις " +
+            "или ἀνταναίρεσις — «взаимное вычитание». " +
+            "Этот алгоритм не был открыт Евклидом, так как " +
+            "упоминание о нём имеется уже в Топике Аристотеля (IV век до н. э.)[3]." +
+            " В «Началах» Евклида он описан дважды — в VII книге для нахождения наибольшего " +
+            "общего делителя двух натуральных чисел[1] и в X книге для нахождения наибольшей " +
+            "общей меры двух однородных величин[2]. В обоих случаях дано геометрическое " +
+            "описание алгоритма, для нахождения «общей меры» двух отрезков.\r\n\r\n" +
+            "Историками математики было выдвинуто предположение, " +
+            "что именно с помощью алгоритма Евклида (процедуры последовательного взаимного вычитания) " +
+            "в древнегреческой математике впервые было открыто " +
+            "существование несоизмеримых величин (стороны и диагонали " +
+            "квадрата, или стороны и диагонали правильного пятиугольника)[10]. " +
+            "Впрочем, это предположение не имеет достаточных документальных " +
+            "подтверждений. Алгоритм для поиска наибольшего общего делителя " +
+            "двух натуральных чисел описан также в I книге древнекитайского т" +
+            "рактата Математика в девяти книгах. ";
     }
 }

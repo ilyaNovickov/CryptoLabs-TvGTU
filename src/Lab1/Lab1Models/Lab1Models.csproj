@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RandomExtra.cs" />
     <Compile Include="MathExtra.cs" />
     <Compile Include="Reciever.cs" />
     <Compile Include="Sender.cs" />

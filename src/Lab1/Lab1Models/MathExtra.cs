@@ -20,7 +20,7 @@ namespace Lab1Models
         /// <param name="exponent">Показатель степени (x).</param>
         /// <param name="modulus">Модуль (y).</param>
         /// <returns>Результат вычислений (a^x % y).</returns>
-        public static ulong ModularExponentiation(ulong baseValue, ulong exponent, ulong modulus)
+        public static long ModularExponentiation(long baseValue, long exponent, long modulus)
         {
             /*
              * Спасибо ChatGPT за разъяснение.
@@ -45,9 +45,9 @@ namespace Lab1Models
             if (modulus == 1)
                 return 0; // Если mod = 1, то результат всегда 0
 
-            ulong result = 1;          // Начальное значение результата
+            long result = 1;          // Начальное значение результата
             //По факрту: a mod y
-            ulong baseMod = baseValue % modulus; // Приводим основание по модулю
+            long baseMod = baseValue % modulus; // Приводим основание по модулю
 
             while (exponent > 0)
             {
@@ -75,14 +75,14 @@ namespace Lab1Models
         /// <summary>
         /// Метод для поиска простых чисел в заданном интервале.
         /// </summary>
-        public static List<ulong> FindPrimesInRange(ulong start, ulong end)
+        public static List<long> FindPrimesInRange(long start, long end)
         {
-            List<ulong> primes = new List<ulong>();
+            List<long> primes = new List<long>();
 
             // Если начало интервала меньше 2, начинаем с 2
             if (start < 2) start = 2;
 
-            for (ulong number = start; number <= end; number++)
+            for (long number = start; number <= end; number++)
             {
                 if (IsPrime(number))
                 {
@@ -96,7 +96,7 @@ namespace Lab1Models
         /// <summary>
         /// Метод для проверки, является ли число простым.
         /// </summary>
-        public static bool IsPrime(ulong number)
+        public static bool IsPrime(long number)
         {
             // 1 не является простым числом
             if (number < 2) return false;
@@ -105,8 +105,8 @@ namespace Lab1Models
             if (number % 2 == 0 && number != 2) return false;
 
             // Проверяем делители от 3 до √number
-            ulong limit = (ulong)Math.Sqrt(number);
-            for (ulong divisor = 3; divisor <= limit; divisor += 2)
+            long limit = (long)Math.Sqrt(number);
+            for (long divisor = 3; divisor <= limit; divisor += 2)
             {
                 if (number % divisor == 0)
                 {
@@ -123,9 +123,9 @@ namespace Lab1Models
         /// <param name="x">Число X</param>
         /// <param name="y">Число Y</param>
         /// <returns>Являются ли числа взаимопростыми</returns>
-        public static bool FindMutuallyPrimeNumbers(ulong x, ulong y)
+        public static bool FindMutuallyPrimeNumbers(long x, long y)
         {
-            return EvklidAlgorithm(x, y) == 1UL;
+            return EvklidAlgorithm(x, y) == 1L;
         }
 
         /// <summary>
@@ -134,23 +134,52 @@ namespace Lab1Models
         /// <param name="a">Число A</param>
         /// <param name="b">Число B</param>
         /// <returns>НОД (наибольший общий делитель)</returns>
-        private static ulong EvklidAlgorithm(ulong a, ulong b)
+        public static long EvklidAlgorithm(long a, long b)
         {
             if (a < b)
             {
-                ulong temp = a; 
+                long temp = a; 
                 a = b; 
                 b = temp;
             }
 
             while (b != 0)
             {
-                ulong mod = a % b;
+                long mod = a % b;
                 a = b;
                 b = mod;
             }
 
             return a;
+        }
+
+        /// <summary>
+        /// Расширенный алгоритм Эвклида для поиска наибольшего общего делителя и коофициентов,
+        /// которые формируют этот делитель по уравнению a*x+b*x=НОД
+        /// </summary>
+        /// <param name="a">Число A</param>
+        /// <param name="b">Число B</param>
+        /// <param name="x">Коофициент X</param>
+        /// <param name="y">Коофициент Y</param>
+        /// <returns>Наибольший общий делитель</returns>
+        public static long ExtendedEvklidAlgorithm(long a, long b, out long x, out long y)
+        {
+            // Если b равно 0, то НОД равен a, и x = 1, y = 0 (a*1+0*0=a)
+            if (b == 0)
+            {
+                x = 1;
+                y = 0;
+                return a;
+            }
+
+            // Рекурсивный вызов для b и a % b
+            long gcd = ExtendedEvklidAlgorithm(b, a % b, out long x1, out long y1);
+
+            // Обновляем x и y по обратной подстановке
+            x = y1;
+            y = x1 - (long)(a / b) * y1;
+
+            return gcd;
         }
     }
 }
