@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace Lab1Models
 {
+#if DEBUG
+    public static class MathExtra
+#else
     internal static class MathExtra
+#endif
     {
         /// <summary>
         /// Быстрое возведение в степень по модулю.
@@ -66,6 +70,87 @@ namespace Lab1Models
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Метод для поиска простых чисел в заданном интервале.
+        /// </summary>
+        public static List<ulong> FindPrimesInRange(ulong start, ulong end)
+        {
+            List<ulong> primes = new List<ulong>();
+
+            // Если начало интервала меньше 2, начинаем с 2
+            if (start < 2) start = 2;
+
+            for (ulong number = start; number <= end; number++)
+            {
+                if (IsPrime(number))
+                {
+                    primes.Add(number);
+                }
+            }
+
+            return primes;
+        }
+
+        /// <summary>
+        /// Метод для проверки, является ли число простым.
+        /// </summary>
+        public static bool IsPrime(ulong number)
+        {
+            // 1 не является простым числом
+            if (number < 2) return false;
+
+            // Проверка на делимость на 2
+            if (number % 2 == 0 && number != 2) return false;
+
+            // Проверяем делители от 3 до √number
+            ulong limit = (ulong)Math.Sqrt(number);
+            for (ulong divisor = 3; divisor <= limit; divisor += 2)
+            {
+                if (number % divisor == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Определение, являются ли числа взаимопростыми (общий делитель "1")
+        /// </summary>
+        /// <param name="x">Число X</param>
+        /// <param name="y">Число Y</param>
+        /// <returns>Являются ли числа взаимопростыми</returns>
+        public static bool FindMutuallyPrimeNumbers(ulong x, ulong y)
+        {
+            return EvklidAlgorithm(x, y) == 1UL;
+        }
+
+        /// <summary>
+        /// Поиск наибольшего общего делителя по алгоритму Эвклида
+        /// </summary>
+        /// <param name="a">Число A</param>
+        /// <param name="b">Число B</param>
+        /// <returns>НОД (наибольший общий делитель)</returns>
+        private static ulong EvklidAlgorithm(ulong a, ulong b)
+        {
+            if (a < b)
+            {
+                ulong temp = a; 
+                a = b; 
+                b = temp;
+            }
+
+            while (b != 0)
+            {
+                ulong mod = a % b;
+                a = b;
+                b = mod;
+            }
+
+            return a;
         }
     }
 }
