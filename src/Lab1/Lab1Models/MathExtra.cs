@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,7 +21,7 @@ namespace Lab1Models
         /// <param name="exponent">Показатель степени (x).</param>
         /// <param name="modulus">Модуль (y).</param>
         /// <returns>Результат вычислений (a^x % y).</returns>
-        public static long ModularExponentiation(long baseValue, long exponent, long modulus)
+        public static BigInteger ModularExponentiation(BigInteger baseValue, BigInteger exponent, BigInteger modulus)
         {
             /*
              * Спасибо ChatGPT за разъяснение.
@@ -45,9 +46,9 @@ namespace Lab1Models
             if (modulus == 1)
                 return 0; // Если mod = 1, то результат всегда 0
 
-            long result = 1;          // Начальное значение результата
+            BigInteger result = 1;          // Начальное значение результата
             //По факрту: a mod y
-            long baseMod = baseValue % modulus; // Приводим основание по модулю
+            BigInteger baseMod = baseValue % modulus; // Приводим основание по модулю
 
             while (exponent > 0)
             {
@@ -75,14 +76,14 @@ namespace Lab1Models
         /// <summary>
         /// Метод для поиска простых чисел в заданном интервале.
         /// </summary>
-        public static List<long> FindPrimesInRange(long start, long end)
+        public static List<ulong> FindPrimesInRange(ulong start, ulong end)
         {
-            List<long> primes = new List<long>();
+            List<ulong> primes = new List<ulong>();
 
             // Если начало интервала меньше 2, начинаем с 2
             if (start < 2) start = 2;
 
-            for (long number = start; number <= end; number++)
+            for (ulong number = start; number <= end; number++)
             {
                 if (IsPrime(number))
                 {
@@ -96,7 +97,7 @@ namespace Lab1Models
         /// <summary>
         /// Метод для проверки, является ли число простым.
         /// </summary>
-        public static bool IsPrime(long number)
+        public static bool IsPrime(BigInteger number)
         {
             // 1 не является простым числом
             if (number < 2) return false;
@@ -105,7 +106,7 @@ namespace Lab1Models
             if (number % 2 == 0 && number != 2) return false;
 
             // Проверяем делители от 3 до √number
-            long limit = (long)Math.Sqrt(number);
+            BigInteger limit = Sqrt(number);
             for (long divisor = 3; divisor <= limit; divisor += 2)
             {
                 if (number % divisor == 0)
@@ -123,9 +124,9 @@ namespace Lab1Models
         /// <param name="x">Число X</param>
         /// <param name="y">Число Y</param>
         /// <returns>Являются ли числа взаимопростыми</returns>
-        public static bool FindMutuallyPrimeNumbers(long x, long y)
+        public static bool FindMutuallyPrimeNumbers(BigInteger x, BigInteger y)
         {
-            return EvklidAlgorithm(x, y) == 1L;
+            return EvklidAlgorithm(x, y) == 1;
         }
 
         /// <summary>
@@ -134,18 +135,18 @@ namespace Lab1Models
         /// <param name="a">Число A</param>
         /// <param name="b">Число B</param>
         /// <returns>НОД (наибольший общий делитель)</returns>
-        public static long EvklidAlgorithm(long a, long b)
+        public static BigInteger EvklidAlgorithm(BigInteger a, BigInteger b)
         {
             if (a < b)
             {
-                long temp = a; 
+                BigInteger temp = a; 
                 a = b; 
                 b = temp;
             }
 
             while (b != 0)
             {
-                long mod = a % b;
+                BigInteger mod = a % b;
                 a = b;
                 b = mod;
             }
@@ -162,7 +163,7 @@ namespace Lab1Models
         /// <param name="x">Коофициент X</param>
         /// <param name="y">Коофициент Y</param>
         /// <returns>Наибольший общий делитель</returns>
-        public static long ExtendedEvklidAlgorithm(long a, long b, out long x, out long y)
+        public static BigInteger ExtendedEvklidAlgorithm(BigInteger a, BigInteger b, out BigInteger x, out BigInteger y)
         {
             // Если b равно 0, то НОД равен a, и x = 1, y = 0 (a*1+0*0=a)
             if (b == 0)
@@ -173,13 +174,41 @@ namespace Lab1Models
             }
 
             // Рекурсивный вызов для b и a % b
-            long gcd = ExtendedEvklidAlgorithm(b, a % b, out long x1, out long y1);
+            BigInteger gcd = ExtendedEvklidAlgorithm(b, a % b, out BigInteger x1, out BigInteger y1);
 
             // Обновляем x и y по обратной подстановке
             x = y1;
             y = x1 - (long)(a / b) * y1;
 
             return gcd;
+        }
+
+        public static BigInteger Sqrt(this BigInteger n)
+        {
+            if (n == 0) return 0;
+            if (n > 0)
+            {
+                int bitLength = Convert.ToInt32(Math.Ceiling(BigInteger.Log(n, 2)));
+                BigInteger root = BigInteger.One << (bitLength / 2);
+
+                while (!isSqrt(n, root))
+                {
+                    root += n / root;
+                    root /= 2;
+                }
+
+                return root;
+            }
+
+            throw new ArithmeticException("NaN");
+        }
+
+        private static Boolean isSqrt(BigInteger n, BigInteger root)
+        {
+            BigInteger lowerBound = root * root;
+            BigInteger upperBound = (root + 1) * (root + 1);
+
+            return (n >= lowerBound && n < upperBound);
         }
     }
 }

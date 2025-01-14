@@ -16,9 +16,9 @@ namespace Lab1Models
 
         static uint p = 0;
         static uint q = 0;
-        static long n = 0;
-        static long d = 0;
-        static long e = 0;
+        static BigInteger n = 0;
+        static BigInteger d = 0;
+        static BigInteger e = 0;
 
         static bool useFileofPrimeNumbers = false;
         static ulong endofPrimeNumberRange = byte.MaxValue;
@@ -39,15 +39,16 @@ namespace Lab1Models
         /// Генерация файла со списком простых чисел
         /// </summary>
         /// <param name="endRange">Конец диапазона простых чисел для генерации</param>
-        public static void GeneratePrimeNumberFile(long endRange)
+        public static void GeneratePrimeNumberFile(ulong endRange)
         {
-            List<long> list = MathExtra.FindPrimesInRange(0L, endRange);
+            List<ulong> list = MathExtra.FindPrimesInRange(0L, endRange);
 
             FileStream streamWriter = new FileStream(precompiledFile, FileMode.Create, FileAccess.Write);
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             binaryFormatter.Serialize(streamWriter, list);
             streamWriter.Close();
         }
+
 
         public static void GenerateKeysWithList()
         {
@@ -73,48 +74,63 @@ namespace Lab1Models
             */
 
 
-            Random rnd = new Random(880035353);
-
-            sign:
+            Random rnd = new Random();
+            //Начало генерации ключей
+sign:
+            //Генерация p
             do
             {
                 p = rnd.NextUint(0U, uint.MaxValue);
             } while (!MathExtra.IsPrime(p));
 
+            //Генерация q
             do
             {
                 q = rnd.NextUint(0U, uint.MaxValue);
-            } while (!MathExtra.IsPrime(p));
-            
-            n = p * q;
+            } while (!MathExtra.IsPrime(q));
 
+            //Определение модуля n
+            n = (BigInteger)p * (BigInteger)q;
+
+            //Так как символьные литералы в C# представлены в UniCode,
+            //то их можно представить как числа от 0 до 2^16 - 1 (т. е. ushort)
+            //Значит, что n должен быть больше ushort.MaxValue, чтобы 
+            //можно было закодировать все символы
             if (n <= ushort.MaxValue)
                 goto sign;
 
-            long eln = (long)(p - 1) * (long)(q - 1);
+            //Фуркция Эйлера
+            BigInteger eln = (BigInteger)(p - 1) * (BigInteger)(q - 1);
 
+            //Определение ключа e
             do
             {
                 e = rnd.NextUint(0U, uint.MaxValue);
             } while (!MathExtra.FindMutuallyPrimeNumbers(e, eln) || !(1 < e && e < eln));
-
-
             
+            //Определение ключа d
             {
-                MathExtra.ExtendedEvklidAlgorithm(eln, e, out long x, out long y);
+                MathExtra.ExtendedEvklidAlgorithm(eln, e, out BigInteger x, out BigInteger y);
 
-                long min = Math.Min(x, y);
+                BigInteger min = BigInteger.Min(x, y);
 
-                d = eln - Math.Abs(min);
+                d = eln - BigInteger.Abs(min);
 
-                d = ModInverse(e, eln);
+                //Возможны ситуации, когда алгоритм находит 
+                //такое d, которое не удовлетворяет требуемому
+                //условию (e*d)% ((q-1)(p-1))
+                //Тогда требуется перезапуск алгоритма
+                BigInteger modTest = (d * e) % eln;
+
+                if (modTest != 1)
+                    goto sign;
+
             }
-            foo(eln, e);
 
-
+            //Тест кодирования
             string message = testMess;
-            long[] crM = new long[message.Length];
-            long[] decrM = new long[message.Length];
+            BigInteger[] crM = new BigInteger[message.Length];
+            BigInteger[] decrM = new BigInteger[message.Length];
             string decrMess = "";
 
             for (int i = 0; i < message.Length; i++)
@@ -124,76 +140,6 @@ namespace Lab1Models
                 decrMess += ((char)decrM[i]);
             }
         }
-
-        // Метод для нахождения мультипликативного обратного
-        static long ModInverse(long a, long m)
-        {
-            long m0 = m, t, q;
-            long x0 = 0, x1 = 1;
-
-            if (m == 1)
-                return 0;
-
-            while (a > 1)
-            {
-                // q - это частное
-                q = a / m;
-
-                t = m;
-
-                // m - остаток, теперь применим алгоритм Евклида
-                m = a % m;
-                a = t;
-
-                t = x0;
-
-                x0 = x1 - q * x0;
-                x1 = t;
-            }
-
-            // Обеспечиваем, что x1 положительно
-            if (x1 < 0)
-                x1 += m0;
-
-            return x1;
-        }
-
-        static void foo(long a, long b)
-        {
-            long q = 0;
-            long r = 0;
-            long x1 = 0;
-            long x2 = 1;
-            long y1 = 1;
-            long y2 = 0;
-
-            long bOld = b;
-            long aOld = a;
-
-            while (b > 0)
-            {
-                q = a / b;
-                r = a - q * b;
-                long x = x2 - q * x1;
-                long y = y2 - q * y1;
-                a = b;
-                b = r;
-                x2 = x1;
-                x1 = x;
-                y2 = y1;
-                y1 = y;
-            }
-
-            long d = aOld - Math.Abs(Math.Min(x2, y2));
-
-            long res = ( (bOld%aOld) * (d%aOld)) % aOld;
-            BigInteger tel = bOld;
-            BigInteger te = bOld;
-            BigInteger td = d;
-
-            BigInteger res2 = (te * td) % tel ;
-        }
-
 
         static string testMess = "Древнегреческие математики называли этот алгоритм ἀνθυφαίρεσις " +
             "или ἀνταναίρεσις — «взаимное вычитание». " +
