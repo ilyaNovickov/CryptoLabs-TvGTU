@@ -89,6 +89,7 @@ namespace Lab1Models
                 {
                     primes.Add(number);
                 }
+
             }
 
             return primes;

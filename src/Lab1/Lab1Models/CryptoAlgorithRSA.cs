@@ -20,59 +20,10 @@ namespace Lab1Models
         static BigInteger d = 0;
         static BigInteger e = 0;
 
-        static bool useFileofPrimeNumbers = false;
-        static ulong endofPrimeNumberRange = byte.MaxValue;
-
-        public static bool UsePrecompilatedFileofPrimeNumbers
-        {
-            set => useFileofPrimeNumbers = value;
-            get => useFileofPrimeNumbers;
-        }
-
-        public static ulong EndofPrimeNumberRange
-        {
-            get => endofPrimeNumberRange;
-            set => endofPrimeNumberRange = value;
-        }
-
-        /// <summary>
-        /// Генерация файла со списком простых чисел
-        /// </summary>
-        /// <param name="endRange">Конец диапазона простых чисел для генерации</param>
-        public static void GeneratePrimeNumberFile(ulong endRange)
-        {
-            List<ulong> list = MathExtra.FindPrimesInRange(0L, endRange);
-
-            FileStream streamWriter = new FileStream(precompiledFile, FileMode.Create, FileAccess.Write);
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-            binaryFormatter.Serialize(streamWriter, list);
-            streamWriter.Close();
-        }
 
 
         public static void GenerateKeysWithList()
         {
-            /*
-            List<ulong> primeNumbers = null;
-
-            if (UsePrecompilatedFileofPrimeNumbers)
-            {
-                FileStream streamWriter = new FileStream(precompiledFile, FileMode.Open, FileAccess.Read);
-                BinaryFormatter binaryFormatter = new BinaryFormatter();
-                object data = binaryFormatter.Deserialize(streamWriter);
-                streamWriter.Close();
-
-                if (data is List<ulong>)
-                    primeNumbers = data as List<ulong>;
-                else
-                    throw new Exception("Не удалось получить данные из файла");
-            }
-            else
-            {
-                primeNumbers = MathExtra.FindPrimesInRange(0UL, EndofPrimeNumberRange);
-            }
-            */
-
 
             Random rnd = new Random();
             //Начало генерации ключей
