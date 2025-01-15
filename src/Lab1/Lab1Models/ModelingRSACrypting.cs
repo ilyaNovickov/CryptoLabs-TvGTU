@@ -25,6 +25,8 @@ namespace Lab1Models
         private string decryptedMessage = null;
         private ulong[][] cryptedMessage = new ulong[0][];
 
+        private List<Test> tests = new List<Test>();
+
         public string Message
         {
             get => message;
@@ -88,7 +90,7 @@ namespace Lab1Models
                 string messagePart = littleMessage[messageNumber];
 
                 //Шифромассив
-                ulong[] cryptedMessage = new ulong[lengthofOneMessage];
+                List<ulong> cryptedMessage = new List<ulong>(lengthofOneMessage);
 
                 //Предыдущий код
                 BigInteger prevCode = 0;
@@ -113,12 +115,24 @@ namespace Lab1Models
                     //Кодируем символ
                     code = MathExtra.ModularExponentiation(code, e, n);
 
+                    if (cryptedMessage.Contains((ulong)code))
+                    {
+                        Test test = new Test()
+                        {
+                            Index = cryptedMessage.IndexOf((ulong)code),
+                            NumbeofMessage = messageNumber
+                        };
+                        tests.Add(test);
+                    }
+
+
                     //Кодируем сообщение
-                    cryptedMessage[i] = ((ulong)code);
+                    //cryptedMessage[i] = ((ulong)code);
+                    cryptedMessage.Add((ulong)code);
                 }
 
                 //Сохраняем шифрсообщение
-                this.CryptedMessage[messageNumber] = cryptedMessage;
+                this.CryptedMessage[messageNumber] = cryptedMessage.ToArray();
             }
             
         }
@@ -169,6 +183,8 @@ namespace Lab1Models
                     prevCode = decryptedCode;
                 }
             }
+
+            this.DecryptedMessage = decryptedMessage;
         }
 
         private string[] CuttingMessage(string message)
@@ -286,5 +302,11 @@ sign:
             //}
         }
 
+
+        struct Test
+        {
+            public int NumbeofMessage { get; set; }
+            public int Index { get; set; }
+        }
     }
 }
