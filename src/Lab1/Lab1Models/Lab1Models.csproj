@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ModelingRSACrypting.cs" />
     <Compile Include="LogEventArgs.cs" />
     <Compile Include="LogEventHandler.cs" />
     <Compile Include="RandomExtra.cs" />

@@ -1,0 +1,265 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Lab1Models
+{
+    public class ModelingRSACrypting
+    {
+        private const int messageMaxLength = 8192;
+        private const int lengthofOneMessage = 512;
+
+        private uint p = 0;
+        private uint q = 0;
+        private BigInteger n = 0;
+        private BigInteger d = 0;
+        private BigInteger e = 0;
+
+        //private Sender sender;
+        //private Reciever reciever;
+
+        private string message = null;
+        private string decryptedMessage = null;
+        private ulong[][] cryptedMessage = new ulong[0][];
+
+        public string Message
+        {
+            get => message;
+            set
+            {
+                if (value.Length > messageMaxLength)
+                    throw new Exception($"Максимальная длина одного сообщения должшо не превышать {messageMaxLength} символов");
+                message = value;
+            }
+        }
+
+        public ulong[][] CryptedMessage
+        {
+            get => cryptedMessage;
+            private set => cryptedMessage = value;
+        }
+
+        public string DecryptedMessage
+        {
+            get => decryptedMessage;
+            private set => decryptedMessage = value;
+        }
+
+        public bool KeysGenerated
+        {
+            get; private set;
+        }
+
+
+
+        public Sender Sender { get; set; }
+
+        public Reciever Reciever { get; set; }
+
+        public static event LogEventHandler LoggingEvent;
+
+        public void GenerateKeys()
+        {
+            GenerateKeys(ref p, ref q, ref n, ref e, ref d);
+
+            KeysGenerated = true;
+        }
+
+        public void SendMessage()
+        {
+            if (!KeysGenerated)
+                throw new Exception("Ключи не сгенерированы");
+
+            if (message == null || message.Length == 0)
+                throw new Exception("Сообщение для отправки отсуствует");
+
+            string[] littleMessage = CuttingMessage(message);
+
+            LoggingEvent?.Invoke(this, new LogEventArgs($"Сообщение было разделено на {littleMessage.Length} подсообщений"));
+
+            this.CryptedMessage = new ulong[littleMessage.Length][];
+
+            for (int messageNumber = 0; messageNumber < littleMessage.Length; messageNumber++)
+            {
+                string messagePart = littleMessage[messageNumber];
+
+                ulong[] cryptedMessage = new ulong[lengthofOneMessage];
+
+                BigInteger prevCode = 0;
+
+                for (int i = 0; i < messagePart.Length; i++)
+                {
+                    BigInteger code = 0;
+
+                    if (i == 0)
+                        code = messagePart[i];
+                    else
+                        code = (messagePart[i] + prevCode) % n;
+
+                    prevCode = code;
+
+                    code = MathExtra.ModularExponentiation(code, e, n);
+
+                    cryptedMessage[i] = ((ulong)code);
+                }
+
+                this.CryptedMessage[messageNumber] = cryptedMessage;
+            }
+            
+        }
+
+        public void ReadMessage()
+        {
+            if (cryptedMessage.Length == 0)
+            {
+                LoggingEvent?.Invoke(this, new LogEventArgs("Нет шифросообщения"));
+                return;
+            }
+
+            string decryptedMessage = "";
+
+            for (int messageNumber = 0; messageNumber < cryptedMessage.Length; messageNumber++)
+            {
+                ulong[] oneMessage = cryptedMessage[messageNumber];
+
+                long prevCode = 0;
+
+                for (int i = 0; i < oneMessage.Length; i++)
+                {
+                    long decryptedCode = (long)MathExtra.ModularExponentiation(oneMessage[i], d, n);
+
+                    if (decryptedCode == 0)
+                    {
+                        continue;
+                    }
+
+                    if (i == 0)
+                        decryptedMessage += (char)(decryptedCode);
+                    else
+                        decryptedMessage += (char)((decryptedCode - prevCode) % n);
+
+                    prevCode = decryptedCode;
+                }
+            }
+        }
+
+        private string[] CuttingMessage(string message)
+        {
+            int n = message.Length / lengthofOneMessage + 1;
+            string[] littleMessage = new string[n];
+
+            for (int i = 0; i < n; i++)
+            {
+                int modLength = message.Length - i * lengthofOneMessage;
+
+                if (modLength >= lengthofOneMessage)
+                    littleMessage[i] = message.Substring(i * lengthofOneMessage, lengthofOneMessage);
+                else
+                    littleMessage[i] = message.Substring(i * lengthofOneMessage, modLength);
+            }
+
+            return littleMessage;
+        }
+
+        private static void GenerateKeys(ref uint p, ref uint q, ref BigInteger n, ref BigInteger e, ref BigInteger d)
+        {
+            LoggingEvent?.Invoke(null, new LogEventArgs($"начало генерации ключей"));
+#if DEBUG
+            Random rnd = new Random(880053535);
+#else
+            Random rnd = new Random();
+#endif
+//Начало генерации ключей
+sign:
+//Генерация p
+            do
+            {
+                p = rnd.NextUint(0U, uint.MaxValue);
+            } while (!MathExtra.IsPrime(p));
+
+            LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число p := {p}"));
+
+            //Генерация q
+            do
+            {
+                q = rnd.NextUint(0U, uint.MaxValue);
+            } while (!MathExtra.IsPrime(q));
+
+            LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число q := {q}"));
+
+            //Определение модуля n
+            n = (BigInteger)p * (BigInteger)q;
+
+            LoggingEvent?.Invoke(null, new LogEventArgs($"Определено число \"n = p * q\" := {n}"));
+
+            //Так как символьные литералы в C# представлены в UniCode,
+            //то их можно представить как числа от 0 до 2^16 - 1 (т. е. ushort)
+            //Значит, что n должен быть больше ushort.MaxValue, чтобы 
+            //можно было закодировать все символы
+            if (n <= ushort.MaxValue*2)
+            {
+                LoggingEvent?.Invoke(null, new LogEventArgs($"Модуль n = {n} не может закодировать все символьные литералы кодировки UniCode\n" +
+                    $"Повторная генерация p и q"));
+                goto sign;
+            }
+
+            //Фуркция Эйлера
+            BigInteger eln = (BigInteger)(p - 1) * (BigInteger)(q - 1);
+
+            LoggingEvent?.Invoke(null, new LogEventArgs($"Вычисление функции эйлера Ф = \"(n - 1) * (q - 1)\" := {eln}"));
+
+            //Определение ключа e
+            do
+            {
+                e = rnd.NextUint(0U, uint.MaxValue);
+            } while (!MathExtra.FindMutuallyPrimeNumbers(e, eln) || !(1 < e && e < eln));
+
+            LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число e := {e}"));
+
+            //Определение ключа d
+            {
+                MathExtra.ExtendedEvklidAlgorithm(eln, e, out BigInteger x, out BigInteger y);
+
+                BigInteger min = BigInteger.Min(x, y);
+
+                d = eln - BigInteger.Abs(min);
+
+                //Возможны ситуации, когда алгоритм находит 
+                //такое d, которое не удовлетворяет требуемому
+                //условию (e*d)% ((q-1)(p-1))
+                //Тогда требуется перезапуск алгоритма
+                BigInteger modTest = (d * e) % eln;
+
+                LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число d := {d}\n" +
+                    $"Проверка (d * e) mod Ф = {modTest}"));
+
+                if (modTest != 1)
+                {
+                    LoggingEvent?.Invoke(null, new LogEventArgs($"Число d не соотведствует требованиям " +
+                        $"=> Повторная генерация ключей"));
+                    goto sign;
+                }
+
+            }
+
+            LoggingEvent?.Invoke(null, new LogEventArgs($"Генерация ключей завершина"));
+
+            ////Тест кодирования
+            //string message = testMess;
+            //BigInteger[] crM = new BigInteger[message.Length];
+            //BigInteger[] decrM = new BigInteger[message.Length];
+            //string decrMess = "";
+
+            //for (int i = 0; i < message.Length; i++)
+            //{
+            //    crM[i] = MathExtra.ModularExponentiation(message[i], e, n);
+            //    decrM[i] = MathExtra.ModularExponentiation(crM[i], d, n);
+            //    decrMess += ((char)decrM[i]);
+            //}
+        }
+
+    }
+}
