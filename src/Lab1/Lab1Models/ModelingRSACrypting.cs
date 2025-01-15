@@ -84,28 +84,40 @@ namespace Lab1Models
 
             for (int messageNumber = 0; messageNumber < littleMessage.Length; messageNumber++)
             {
+                //Сообщение для шифрования
                 string messagePart = littleMessage[messageNumber];
 
+                //Шифромассив
                 ulong[] cryptedMessage = new ulong[lengthofOneMessage];
 
+                //Предыдущий код
                 BigInteger prevCode = 0;
 
                 for (int i = 0; i < messagePart.Length; i++)
                 {
                     BigInteger code = 0;
 
+                    //За каждым символьным литералом скрывается число от 0 до 2^16 - 1
+                    //Так как числа могут часто повторяться, то числа кодируюся как
+                    //b = (b + a) % n, где a - это превыдущий код числа (ДО КОДИРОВКИ)
+
+                    //Перекодировка символов
                     if (i == 0)
                         code = messagePart[i];
                     else
                         code = (messagePart[i] + prevCode) % n;
 
+                    //Сохранение предыдущего символа
                     prevCode = code;
 
+                    //Кодируем символ
                     code = MathExtra.ModularExponentiation(code, e, n);
 
+                    //Кодируем сообщение
                     cryptedMessage[i] = ((ulong)code);
                 }
 
+                //Сохраняем шифрсообщение
                 this.CryptedMessage[messageNumber] = cryptedMessage;
             }
             
@@ -123,24 +135,37 @@ namespace Lab1Models
 
             for (int messageNumber = 0; messageNumber < cryptedMessage.Length; messageNumber++)
             {
+                //Шифрсообщение
                 ulong[] oneMessage = cryptedMessage[messageNumber];
 
+                //Код предыдущего сооьщения
                 long prevCode = 0;
 
                 for (int i = 0; i < oneMessage.Length; i++)
                 {
+                    //Расшифровка сообщения
                     long decryptedCode = (long)MathExtra.ModularExponentiation(oneMessage[i], d, n);
 
+                    //Ести код равень 0, то переход к следующему символу
                     if (decryptedCode == 0)
                     {
                         continue;
                     }
 
+                    //За каждым символьным литералом скрывается число от 0 до 2^16 - 1
+                    //Так как числа могут часто повторяться, то числа кодируюся как
+                    //b = (b + a) % n, где a - это превыдущий код числа (ДО КОДИРОВКИ)
+                    //Для расшифровку использую формулу
+                    //b = (b - a) % n, где a - это предыдущий символ ДО КОДИРОВКИ
+                    //а это значит, что после этой расшифроки
+
+                    //Расшифровка символов
                     if (i == 0)
                         decryptedMessage += (char)(decryptedCode);
                     else
                         decryptedMessage += (char)((decryptedCode - prevCode) % n);
 
+                    //Сохряняем предыдущий расшифрованый символ
                     prevCode = decryptedCode;
                 }
             }
