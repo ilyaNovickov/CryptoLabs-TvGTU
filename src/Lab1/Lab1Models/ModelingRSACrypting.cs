@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using ImmutableArr = System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<ulong>>;
 
 namespace Lab1Models
 {
@@ -23,7 +25,7 @@ namespace Lab1Models
 
         private string message = null;
         private string decryptedMessage = null;
-        private ulong[][] cryptedMessage = new ulong[0][];
+        private ImmutableArr cryptedMessage = new ImmutableArr();
 
         private List<Test> tests = new List<Test>();
 
@@ -35,19 +37,14 @@ namespace Lab1Models
                 if (value.Length > messageMaxLength)
                     throw new Exception($"Максимальная длина одного сообщения должшо не превышать {messageMaxLength} символов");
                 message = value;
+                CryptedMessage.Clear();
             }
         }
 
-        public ulong[][] CryptedMessage
+        public ImmutableArr CryptedMessage
         {
             get => cryptedMessage;
             private set => cryptedMessage = value;
-        }
-
-        public string DecryptedMessage
-        {
-            get => decryptedMessage;
-            private set => decryptedMessage = value;
         }
 
         public bool KeysGenerated
@@ -82,7 +79,9 @@ namespace Lab1Models
 
             LoggingEvent?.Invoke(this, new LogEventArgs($"Сообщение было разделено на {littleMessage.Length} подсообщений"));
 
-            this.CryptedMessage = new ulong[littleMessage.Length][];
+            //this.CryptedMessage = new ulong[littleMessage.Length][];
+            this.CryptedMessage = ImmutableArr.Empty;
+            ImmutableArr.Builder builder = this.CryptedMessage.ToBuilder();
 
             for (int messageNumber = 0; messageNumber < littleMessage.Length; messageNumber++)
             {
@@ -132,17 +131,19 @@ namespace Lab1Models
                 }
 
                 //Сохраняем шифрсообщение
-                this.CryptedMessage[messageNumber] = cryptedMessage.ToArray();
+                //this.CryptedMessage[messageNumber] = cryptedMessage.ToArray();
+                builder.Add(cryptedMessage.ToImmutableArray<ulong>());
             }
-            
+
+            CryptedMessage = builder.ToImmutable();
         }
 
-        public void ReadMessage()
+        public string ReadMessage()
         {
             if (cryptedMessage.Length == 0)
             {
                 LoggingEvent?.Invoke(this, new LogEventArgs("Нет шифросообщения"));
-                return;
+                return null;
             }
 
             string decryptedMessage = "";
@@ -150,7 +151,7 @@ namespace Lab1Models
             for (int messageNumber = 0; messageNumber < cryptedMessage.Length; messageNumber++)
             {
                 //Шифрсообщение
-                ulong[] oneMessage = cryptedMessage[messageNumber];
+                ImmutableArray<ulong> oneMessage = cryptedMessage[messageNumber];
 
                 //Код предыдущего сооьщения
                 long prevCode = 0;
@@ -184,7 +185,7 @@ namespace Lab1Models
                 }
             }
 
-            this.DecryptedMessage = decryptedMessage;
+            return decryptedMessage;
         }
 
         private string[] CuttingMessage(string message)
@@ -209,7 +210,8 @@ namespace Lab1Models
         {
             LoggingEvent?.Invoke(null, new LogEventArgs($"начало генерации ключей"));
 #if DEBUG
-            Random rnd = new Random(880053535);
+            //Random rnd = new Random(880053535);
+            Random rnd = new Random();
 #else
             Random rnd = new Random();
 #endif
