@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LogEventArgs.cs" />
+    <Compile Include="LogEventHandler.cs" />
     <Compile Include="RandomExtra.cs" />
     <Compile Include="MathExtra.cs" />
     <Compile Include="Reciever.cs" />
