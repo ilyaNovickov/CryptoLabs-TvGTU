@@ -209,15 +209,12 @@ namespace Lab1Models
         private static void GenerateKeys(ref uint p, ref uint q, ref BigInteger n, ref BigInteger e, ref BigInteger d)
         {
             LoggingEvent?.Invoke(null, new LogEventArgs($"начало генерации ключей"));
-#if DEBUG
             //Random rnd = new Random(880053535);
             Random rnd = new Random();
-#else
-            Random rnd = new Random();
-#endif
-//Начало генерации ключей
+
+            //Начало генерации ключей
 sign:
-//Генерация p
+            //Генерация p
             do
             {
                 p = rnd.NextUint(0U, ushort.MaxValue);
@@ -229,7 +226,7 @@ sign:
             do
             {
                 q = rnd.NextUint(0U, ushort.MaxValue);
-            } while (!MathExtra.IsPrime(q));
+            } while (!MathExtra.IsPrime(q) || p == q);
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число q := {q}"));
 
@@ -242,7 +239,7 @@ sign:
             //то их можно представить как числа от 0 до 2^16 - 1 (т. е. ushort)
             //Значит, что n должен быть больше ushort.MaxValue, чтобы 
             //можно было закодировать все символы
-            if (n <= ushort.MaxValue*lengthofOneMessage)
+            if (n <= ushort.MaxValue * lengthofOneMessage)
             {
                 LoggingEvent?.Invoke(null, new LogEventArgs($"Модуль n = {n} не может закодировать все символьные литералы кодировки UniCode\n" +
                     $"Повторная генерация p и q"));
