@@ -209,7 +209,7 @@ namespace Lab1Models
         private static void GenerateKeys(ref uint p, ref uint q, ref BigInteger n, ref BigInteger e, ref BigInteger d)
         {
             LoggingEvent?.Invoke(null, new LogEventArgs($"начало генерации ключей"));
-            //Random rnd = new Random(880053535);
+
             Random rnd = new Random();
 
             //Начало генерации ключей
