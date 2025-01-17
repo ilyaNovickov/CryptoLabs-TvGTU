@@ -242,7 +242,7 @@ sign:
             //то их можно представить как числа от 0 до 2^16 - 1 (т. е. ushort)
             //Значит, что n должен быть больше ushort.MaxValue, чтобы 
             //можно было закодировать все символы
-            if (n <= ushort.MaxValue*2)
+            if (n <= ushort.MaxValue*lengthofOneMessage)
             {
                 LoggingEvent?.Invoke(null, new LogEventArgs($"Модуль n = {n} не может закодировать все символьные литералы кодировки UniCode\n" +
                     $"Повторная генерация p и q"));
