@@ -24,8 +24,6 @@ namespace Lab1Models
         public static BigInteger ModularExponentiation(BigInteger baseValue, BigInteger exponent, BigInteger modulus)
         {
             /*
-             * Спасибо ChatGPT за разъяснение.
-             * 
              * Идея испольует свойства mod и степеней:
              * - (a*b) mod y = [ (a mod y) * (b mod y) ] mod y
              * - a^x * a^y = a^(x+y)

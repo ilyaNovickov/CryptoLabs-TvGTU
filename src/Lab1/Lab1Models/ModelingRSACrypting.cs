@@ -209,18 +209,17 @@ namespace Lab1Models
         private static void GenerateKeys(ref uint p, ref uint q, ref BigInteger n, ref BigInteger e, ref BigInteger d)
         {
             LoggingEvent?.Invoke(null, new LogEventArgs($"начало генерации ключей"));
-#if DEBUG
-            //Random rnd = new Random(880053535);
+
             Random rnd = new Random();
-#else
-            Random rnd = new Random();
-#endif
+
 //Начало генерации ключей
 sign:
-//Генерация p
+            //Генерация p
             do
             {
                 p = rnd.NextUint(0U, uint.MaxValue);
+                //p = rnd.NextUint(0U, ushort.MaxValue);
+                //p = 21529;
             } while (!MathExtra.IsPrime(p));
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число p := {p}"));
@@ -229,7 +228,9 @@ sign:
             do
             {
                 q = rnd.NextUint(0U, uint.MaxValue);
-            } while (!MathExtra.IsPrime(q));
+                //q = rnd.NextUint(0U, ushort.MaxValue);
+                //q = 35263;
+            } while (!MathExtra.IsPrime(q) && q == p);
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число q := {q}"));
 
@@ -258,6 +259,7 @@ sign:
             do
             {
                 e = rnd.NextUint(0U, uint.MaxValue);
+                //e= 754094671;
             } while (!MathExtra.FindMutuallyPrimeNumbers(e, eln) || !(1 < e && e < eln));
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число e := {e}"));
@@ -269,6 +271,7 @@ sign:
                 BigInteger min = BigInteger.Min(x, y);
 
                 d = eln - BigInteger.Abs(min);
+                //d = 44856271;
 
                 //Возможны ситуации, когда алгоритм находит 
                 //такое d, которое не удовлетворяет требуемому
@@ -289,22 +292,9 @@ sign:
             }
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Генерация ключей завершина"));
-
-            ////Тест кодирования
-            //string message = testMess;
-            //BigInteger[] crM = new BigInteger[message.Length];
-            //BigInteger[] decrM = new BigInteger[message.Length];
-            //string decrMess = "";
-
-            //for (int i = 0; i < message.Length; i++)
-            //{
-            //    crM[i] = MathExtra.ModularExponentiation(message[i], e, n);
-            //    decrM[i] = MathExtra.ModularExponentiation(crM[i], d, n);
-            //    decrMess += ((char)decrM[i]);
-            //}
         }
 
-
+        //Тестовая структура на случай нахождения одинаковых симвлово
         struct Test
         {
             public int NumbeofMessage { get; set; }
