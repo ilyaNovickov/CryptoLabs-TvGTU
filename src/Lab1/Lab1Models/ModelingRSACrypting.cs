@@ -220,7 +220,7 @@ sign:
 //Генерация p
             do
             {
-                p = rnd.NextUint(0U, uint.MaxValue);
+                p = rnd.NextUint(0U, ushort.MaxValue);
             } while (!MathExtra.IsPrime(p));
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число p := {p}"));
@@ -228,7 +228,7 @@ sign:
             //Генерация q
             do
             {
-                q = rnd.NextUint(0U, uint.MaxValue);
+                q = rnd.NextUint(0U, ushort.MaxValue);
             } while (!MathExtra.IsPrime(q));
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число q := {q}"));
@@ -242,7 +242,7 @@ sign:
             //то их можно представить как числа от 0 до 2^16 - 1 (т. е. ushort)
             //Значит, что n должен быть больше ushort.MaxValue, чтобы 
             //можно было закодировать все символы
-            if (n <= ushort.MaxValue*2)
+            if (n <= ushort.MaxValue*lengthofOneMessage)
             {
                 LoggingEvent?.Invoke(null, new LogEventArgs($"Модуль n = {n} не может закодировать все символьные литералы кодировки UniCode\n" +
                     $"Повторная генерация p и q"));
