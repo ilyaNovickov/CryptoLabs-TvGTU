@@ -6,8 +6,19 @@ using System.Threading.Tasks;
 
 namespace Lab1Models
 {
+    /// <summary>
+    /// Доп методы для класса рандомайзера Random
+    /// </summary>
     public static class RandomExtra
     {
+        /// <summary>
+        /// Генерация случайного числа типа uint в заданном диапазоне
+        /// </summary>
+        /// <param name="random">Класс рандомайзера</param>
+        /// <param name="minValue">Минимальная граница</param>
+        /// <param name="maxValue">Максимальная граница</param>
+        /// <returns>Случайное число из заданного диапазона</returns>
+        /// <exception cref="Exception"></exception>
         public static uint NextUint(this Random random, uint minValue, uint maxValue)
         {
             if (minValue > maxValue)
@@ -24,6 +35,14 @@ namespace Lab1Models
             return res;
         }
 
+        /// <summary>
+        /// Генерация случайного числа типа ulong в заданном диапазоне
+        /// </summary>
+        /// <param name="random">Класс рандомайзера</param>
+        /// <param name="minValue">Минимальная граница</param>
+        /// <param name="maxValue">Максимальная граница</param>
+        /// <returns>Случайное число из заданного диапазона</returns>
+        /// <exception cref="Exception"></exception>
         public static ulong NextUlong(this Random random, ulong minValue, ulong maxValue)
         {
             if (minValue > maxValue)

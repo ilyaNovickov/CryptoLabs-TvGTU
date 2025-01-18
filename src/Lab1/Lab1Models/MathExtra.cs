@@ -24,8 +24,6 @@ namespace Lab1Models
         public static BigInteger ModularExponentiation(BigInteger baseValue, BigInteger exponent, BigInteger modulus)
         {
             /*
-             * Спасибо ChatGPT за разъяснение.
-             * 
              * Идея испольует свойства mod и степеней:
              * - (a*b) mod y = [ (a mod y) * (b mod y) ] mod y
              * - a^x * a^y = a^(x+y)
@@ -81,7 +79,8 @@ namespace Lab1Models
             List<ulong> primes = new List<ulong>();
 
             // Если начало интервала меньше 2, начинаем с 2
-            if (start < 2) start = 2;
+            if (start < 2) 
+                start = 2;
 
             for (ulong number = start; number <= end; number++)
             {
@@ -101,13 +100,16 @@ namespace Lab1Models
         public static bool IsPrime(BigInteger number)
         {
             // 1 не является простым числом
-            if (number < 2) return false;
+            if (number < 2) 
+                return false;
 
             // Проверка на делимость на 2
-            if (number % 2 == 0 && number != 2) return false;
+            if (number % 2 == 0 && number != 2) 
+                return false;
 
             // Проверяем делители от 3 до √number
             BigInteger limit = Sqrt(number);
+
             for (long divisor = 3; divisor <= limit; divisor += 2)
             {
                 if (number % divisor == 0)
@@ -184,9 +186,17 @@ namespace Lab1Models
             return gcd;
         }
 
+        /// <summary>
+        /// Получение квадратного корня у структуры BigInteger
+        /// </summary>
+        /// <param name="n">Число типа BigInteger</param>
+        /// <returns>Квадратный корень в формате BigInteger</returns>
+        /// <exception cref="ArithmeticException">Результат неопределён (NaN)</exception>
         public static BigInteger Sqrt(this BigInteger n)
         {
-            if (n == 0) return 0;
+            if (n == 0) 
+                return 0;
+
             if (n > 0)
             {
                 int bitLength = Convert.ToInt32(Math.Ceiling(BigInteger.Log(n, 2)));
@@ -204,7 +214,14 @@ namespace Lab1Models
             throw new ArithmeticException("NaN");
         }
 
-        private static Boolean isSqrt(BigInteger n, BigInteger root)
+        /// <summary>
+        /// Определяет, является ли число root типа BigInteger 
+        /// квадратным корнем числа n ( root = sqrt(n) )
+        /// </summary>
+        /// <param name="n">Основание</param>
+        /// <param name="root">Корень</param>
+        /// <returns></returns>
+        private static bool isSqrt(BigInteger n, BigInteger root)
         {
             BigInteger lowerBound = root * root;
             BigInteger upperBound = (root + 1) * (root + 1);

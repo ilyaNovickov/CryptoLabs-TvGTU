@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Lab1Models
 {
+    [Obsolete]
     public class Reciever
     {
         private string gecryptedMessage = "";

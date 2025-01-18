@@ -10,6 +10,7 @@ using System.Numerics;
 
 namespace Lab1Models
 {
+    [Obsolete]
     public static class CryptoAlgorithRSA
     {
         static string precompiledFile = "precompPrimeNumbers.bin";

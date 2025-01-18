@@ -20,12 +20,9 @@ namespace Lab1Models
         private BigInteger d = 0;
         private BigInteger e = 0;
 
-        //private Sender sender;
-        //private Reciever reciever;
-
         private string message = null;
-        private string decryptedMessage = null;
-        private ImmutableArr cryptedMessage = new ImmutableArr();
+
+        private ImmutableArr cryptedMessage = ImmutableArr.Empty;
 
         private List<Test> tests = new List<Test>();
 
@@ -52,12 +49,6 @@ namespace Lab1Models
             get; private set;
         }
 
-
-
-        public Sender Sender { get; set; }
-
-        public Reciever Reciever { get; set; }
-
         public static event LogEventHandler LoggingEvent;
 
         public void GenerateKeys()
@@ -67,154 +58,16 @@ namespace Lab1Models
             KeysGenerated = true;
         }
 
-        public void SendMessage()
+        private static void GenerateKeys(ref uint p, ref uint q, ref BigInteger n, 
+            ref BigInteger e, ref BigInteger d)
         {
-            if (!KeysGenerated)
-                throw new Exception("Ключи не сгенерированы");
-
-            if (message == null || message.Length == 0)
-                throw new Exception("Сообщение для отправки отсуствует");
-
-            string[] littleMessage = CuttingMessage(message);
-
-            LoggingEvent?.Invoke(this, new LogEventArgs($"Сообщение было разделено на {littleMessage.Length} подсообщений"));
-
-            //this.CryptedMessage = new ulong[littleMessage.Length][];
-            this.CryptedMessage = ImmutableArr.Empty;
-            ImmutableArr.Builder builder = this.CryptedMessage.ToBuilder();
-
-            for (int messageNumber = 0; messageNumber < littleMessage.Length; messageNumber++)
-            {
-                //Сообщение для шифрования
-                string messagePart = littleMessage[messageNumber];
-
-                //Шифромассив
-                List<ulong> cryptedMessage = new List<ulong>(lengthofOneMessage);
-
-                //Предыдущий код
-                BigInteger prevCode = 0;
-
-                for (int i = 0; i < messagePart.Length; i++)
-                {
-                    BigInteger code = 0;
-
-                    //За каждым символьным литералом скрывается число от 0 до 2^16 - 1
-                    //Так как числа могут часто повторяться, то числа кодируюся как
-                    //b = (b + a) % n, где a - это превыдущий код числа 
-
-                    //Перекодировка символов
-                    if (i == 0)
-                        code = messagePart[i];
-                    else
-                        code = (messagePart[i] + prevCode) % n;
-
-                    //Сохранение предыдущего символа
-                    prevCode = code;
-
-                    //Кодируем символ
-                    code = MathExtra.ModularExponentiation(code, e, n);
-
-                    if (cryptedMessage.Contains((ulong)code))
-                    {
-                        Test test = new Test()
-                        {
-                            Index = cryptedMessage.IndexOf((ulong)code),
-                            NumbeofMessage = messageNumber
-                        };
-                        tests.Add(test);
-                    }
-
-
-                    //Кодируем сообщение
-                    //cryptedMessage[i] = ((ulong)code);
-                    cryptedMessage.Add((ulong)code);
-                }
-
-                //Сохраняем шифрсообщение
-                //this.CryptedMessage[messageNumber] = cryptedMessage.ToArray();
-                builder.Add(cryptedMessage.ToImmutableArray<ulong>());
-            }
-
-            CryptedMessage = builder.ToImmutable();
-        }
-
-        public string ReadMessage()
-        {
-            if (cryptedMessage.Length == 0)
-            {
-                LoggingEvent?.Invoke(this, new LogEventArgs("Нет шифросообщения"));
-                return null;
-            }
-
-            string decryptedMessage = "";
-
-            for (int messageNumber = 0; messageNumber < cryptedMessage.Length; messageNumber++)
-            {
-                //Шифрсообщение
-                ImmutableArray<ulong> oneMessage = cryptedMessage[messageNumber];
-
-                //Код предыдущего сооьщения
-                long prevCode = 0;
-
-                for (int i = 0; i < oneMessage.Length; i++)
-                {
-                    //Расшифровка сообщения
-                    long decryptedCode = (long)MathExtra.ModularExponentiation(oneMessage[i], d, n);
-
-                    //Ести код равень 0, то переход к следующему символу
-                    if (decryptedCode == 0)
-                    {
-                        continue;
-                    }
-
-                    //За каждым символьным литералом скрывается число от 0 до 2^16 - 1
-                    //Так как числа могут часто повторяться, то числа кодируюся как
-                    //b = (b + a) % n, где a - это превыдущий код числа (ДО КОДИРОВКИ)
-                    //Для расшифровку использую формулу
-                    //b = (b - a) % n, где a - это предыдущий символ ДО КОДИРОВКИ
-                    //а это значит, что после этой расшифроки
-
-                    //Расшифровка символов
-                    if (i == 0)
-                        decryptedMessage += (char)(decryptedCode);
-                    else
-                        decryptedMessage += (char)((decryptedCode - prevCode) % n);
-
-                    //Сохряняем предыдущий расшифрованый символ
-                    prevCode = decryptedCode;
-                }
-            }
-
-            return decryptedMessage;
-        }
-
-        private string[] CuttingMessage(string message)
-        {
-            int n = message.Length / lengthofOneMessage + 1;
-            string[] littleMessage = new string[n];
-
-            for (int i = 0; i < n; i++)
-            {
-                int modLength = message.Length - i * lengthofOneMessage;
-
-                if (modLength >= lengthofOneMessage)
-                    littleMessage[i] = message.Substring(i * lengthofOneMessage, lengthofOneMessage);
-                else
-                    littleMessage[i] = message.Substring(i * lengthofOneMessage, modLength);
-            }
-
-            return littleMessage;
-        }
-
-        private static void GenerateKeys(ref uint p, ref uint q, ref BigInteger n, ref BigInteger e, ref BigInteger d)
-        {
-            LoggingEvent?.Invoke(null, new LogEventArgs($"начало генерации ключей"));
+            LoggingEvent?.Invoke(null, new LogEventArgs($"Начало генерации ключей"));
 
             Random rnd = new Random();
 
-            //Начало генерации ключей
+//Начало генерации ключей
 sign:
-            //Генерация p
+//Генерация p
             do
             {
                 p = rnd.NextUint(0U, ushort.MaxValue);
@@ -249,7 +102,7 @@ sign:
             //Фуркция Эйлера
             BigInteger eln = (BigInteger)(p - 1) * (BigInteger)(q - 1);
 
-            LoggingEvent?.Invoke(null, new LogEventArgs($"Вычисление функции эйлера Ф = \"(n - 1) * (q - 1)\" := {eln}"));
+            LoggingEvent?.Invoke(null, new LogEventArgs($"Вычисление функции Эйлера Ф = \"(n - 1) * (q - 1)\" := {eln}"));
 
             //Определение ключа e
             do
@@ -286,22 +139,166 @@ sign:
             }
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Генерация ключей завершина"));
-
-            ////Тест кодирования
-            //string message = testMess;
-            //BigInteger[] crM = new BigInteger[message.Length];
-            //BigInteger[] decrM = new BigInteger[message.Length];
-            //string decrMess = "";
-
-            //for (int i = 0; i < message.Length; i++)
-            //{
-            //    crM[i] = MathExtra.ModularExponentiation(message[i], e, n);
-            //    decrM[i] = MathExtra.ModularExponentiation(crM[i], d, n);
-            //    decrMess += ((char)decrM[i]);
-            //}
         }
 
+        public void SendMessage()
+        {
+            if (!KeysGenerated)
+                throw new Exception("Ключи не сгенерированы");
 
+            if (message == null || message.Length == 0)
+                throw new Exception("Сообщение для отправки отсуствует");
+
+            //Разрезание 1-ого сообщения на несколько определённой длины
+            string[] littleMessage = CuttingMessage(message);
+
+            LoggingEvent?.Invoke(this, new LogEventArgs($"Сообщение было разделено на {littleMessage.Length} подсообщений {lengthofOneMessage} символов каждое"));
+
+            this.CryptedMessage = ImmutableArr.Empty;
+            ImmutableArr.Builder builder = this.CryptedMessage.ToBuilder();
+
+            LoggingEvent?.Invoke(this, new LogEventArgs("Начало кодировки сообщений"));
+
+            for (int messageNumber = 0; messageNumber < littleMessage.Length; messageNumber++)
+            {
+                LoggingEvent?.Invoke(this, new LogEventArgs($"Шифрация сообщения №{messageNumber}"));
+
+                //Сообщение для шифрования
+                string messagePart = littleMessage[messageNumber];
+
+                //Шифромассив
+                List<ulong> cryptedMessage = new List<ulong>(lengthofOneMessage);
+
+                //Предыдущий код
+                BigInteger prevCode = 0;
+
+                for (int i = 0; i < messagePart.Length; i++)
+                {
+                    BigInteger code = 0;
+
+                    //За каждым символьным литералом скрывается число от 0 до 2^16 - 1
+                    //Так как числа могут часто повторяться, то числа кодируюся как
+                    //b = (b + a) % n, где a - это превыдущий код числа 
+
+                    //Перекодировка символов
+                    if (i == 0)
+                        code = messagePart[i];
+                    else
+                        code = (messagePart[i] + prevCode) % n;
+
+                    //Сохранение предыдущего символа
+                    prevCode = code;
+
+                    //Кодируем символ
+                    code = MathExtra.ModularExponentiation(code, e, n);
+
+                    //На случай, если в шифросообщение есть повторяющиеся символы
+                    if (cryptedMessage.Contains((ulong)code))
+                    {
+                        throw new Exception("oops");
+
+                        Test test = new Test()
+                        {
+                            Index = cryptedMessage.IndexOf((ulong)code),
+                            NumbeofMessage = messageNumber
+                        };
+                        tests.Add(test);
+                    }
+
+
+                    //Кодируем сообщение
+                    cryptedMessage.Add((ulong)code);
+                }
+
+                //Сохраняем шифрсообщение
+                builder.Add(cryptedMessage.ToImmutableArray<ulong>());
+
+                LoggingEvent?.Invoke(this, new LogEventArgs($"Окончание шифрации сообщения №{messageNumber}"));
+            }
+
+            CryptedMessage = builder.ToImmutable();
+
+            LoggingEvent?.Invoke(this, new LogEventArgs("Сообщение закодировано"));
+        }
+
+        public string ReadMessage()
+        {
+            if (cryptedMessage.Length == 0)
+            {
+                LoggingEvent?.Invoke(this, new LogEventArgs("Нет шифросообщения"));
+                return null;
+            }
+
+            string decryptedMessage = "";
+
+            LoggingEvent?.Invoke(this, new LogEventArgs("Начало дешифрации сообщений"));
+
+            for (int messageNumber = 0; messageNumber < cryptedMessage.Length; messageNumber++)
+            {
+                LoggingEvent?.Invoke(this, new LogEventArgs($"Дешифрация сообщения №{messageNumber}"));
+
+                //Шифрсообщение
+                ImmutableArray<ulong> oneMessage = cryptedMessage[messageNumber];
+
+                //Код предыдущего сооьщения
+                long prevCode = 0;
+
+                for (int i = 0; i < oneMessage.Length; i++)
+                {
+                    //Расшифровка сообщения
+                    long decryptedCode = (long)MathExtra.ModularExponentiation(oneMessage[i], d, n);
+
+                    //Ести код равень 0, то переход к следующему символу
+                    if (decryptedCode == 0)
+                    {
+                        continue;
+                    }
+
+                    //За каждым символьным литералом скрывается число от 0 до 2^16 - 1
+                    //Так как числа могут часто повторяться, то числа кодируюся как
+                    //b = (b + a) % n, где a - это превыдущий код числа (ДО КОДИРОВКИ)
+                    //Для расшифровку использую формулу
+                    //b = (b - a) % n, где a - это предыдущий символ ДО КОДИРОВКИ
+                    //а это значит, что после этой расшифроки
+
+                    //Расшифровка символов
+                    if (i == 0)
+                        decryptedMessage += (char)(decryptedCode);
+                    else
+                        decryptedMessage += (char)((decryptedCode - prevCode) % n);
+
+                    //Сохряняем предыдущий расшифрованый символ
+                    prevCode = decryptedCode;
+
+                    LoggingEvent?.Invoke(this, new LogEventArgs($"Окончание дешифрации сообщения №{messageNumber}"));
+                }
+            }
+
+            LoggingEvent?.Invoke(this, new LogEventArgs("Конец дешифрации сообщений"));
+
+            return decryptedMessage;
+        }
+
+        private string[] CuttingMessage(string message)
+        {
+            int n = message.Length / lengthofOneMessage + 1;
+
+            string[] littleMessage = new string[n];
+
+            for (int i = 0; i < n; i++)
+            {
+                int modLength = message.Length - i * lengthofOneMessage;
+
+                if (modLength >= lengthofOneMessage)
+                    littleMessage[i] = message.Substring(i * lengthofOneMessage, lengthofOneMessage);
+                else
+                    littleMessage[i] = message.Substring(i * lengthofOneMessage, modLength);
+            }
+
+            return littleMessage;
+        }
+
+        
         struct Test
         {
             public int NumbeofMessage { get; set; }
