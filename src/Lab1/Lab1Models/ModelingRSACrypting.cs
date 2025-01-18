@@ -49,6 +49,10 @@ namespace Lab1Models
             get; private set;
         }
 
+        public int LengthOfOneMessage => lengthofOneMessage;
+
+        public int MessageMaxLength => messageMaxLength;
+
         public static event LogEventHandler LoggingEvent;
 
         public void GenerateKeys()
