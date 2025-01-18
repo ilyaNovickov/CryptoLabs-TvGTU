@@ -7,6 +7,26 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <GroupBox Header="Сообщение">
+                <TextBox TextWrapping="NoWrap" 
+                         AcceptsReturn="True" 
+                         HorizontalScrollBarVisibility="Visible" 
+                         VerticalScrollBarVisibility="Visible"/>
+            </GroupBox>
+            <ListBox Grid.Column="1" ItemsSource="{Binding CryptedMessage}">
+                
+            </ListBox>
+
+        </Grid>
     </Grid>
 </Window>

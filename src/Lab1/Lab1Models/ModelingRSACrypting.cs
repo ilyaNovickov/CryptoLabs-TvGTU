@@ -53,7 +53,7 @@ namespace Lab1Models
 
         public int MessageMaxLength => messageMaxLength;
 
-        public static event LogEventHandler LoggingEvent;
+        public event LogEventHandler LoggingEvent;
 
         public void GenerateKeys()
         {
@@ -62,7 +62,7 @@ namespace Lab1Models
             KeysGenerated = true;
         }
 
-        private static void GenerateKeys(ref uint p, ref uint q, ref BigInteger n, 
+        private void GenerateKeys(ref uint p, ref uint q, ref BigInteger n, 
             ref BigInteger e, ref BigInteger d)
         {
             LoggingEvent?.Invoke(null, new LogEventArgs($"Начало генерации ключей"));

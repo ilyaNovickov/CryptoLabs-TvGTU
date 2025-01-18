@@ -17,6 +17,18 @@ namespace Lab1Wpf.ModelViews
 
         private string decryptedMessage = "";
 
+        private string logString = "";
+
+        public MainWindowModelView()
+        {
+            model.LoggingEvent += Model_LoggingEvent; 
+        }
+
+        private void Model_LoggingEvent(object sender, LogEventArgs e)
+        {
+            LogString += (e.Message + '\n');
+        }
+
         public string MessageToCrypt
         {
             get => model.Message;
@@ -27,9 +39,11 @@ namespace Lab1Wpf.ModelViews
             }
         }
 
-        public ImmutableArray<ImmutableArray<ulong>> CryptedMessage
+        //public ImmutableArray<ImmutableArray<ulong>> CryptedMessage
+        public ulong[][] CryptedMessage
         {
-            get => model.CryptedMessage;
+            //get => model.CryptedMessage;
+            get => new ulong[][] { new ulong[] { 4, 5,7 ,}, new ulong[] { 4, 63,2 ,1}, new ulong[] { 4, 63, 5 } };
         }
 
         public string DecryptedMessage
@@ -38,6 +52,16 @@ namespace Lab1Wpf.ModelViews
             private set
             {
                 decryptedMessage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string LogString
+        {
+            get => logString;
+            set
+            {
+                logString = value;
                 OnPropertyChanged();
             }
         }
