@@ -26,6 +26,12 @@ namespace Lab1Models
 
         private List<Test> tests = new List<Test>();
 
+        public uint P => p;
+        public uint Q => q;
+        public BigInteger N => n;
+        public BigInteger D => d;
+        public BigInteger E => e;
+
         public string Message
         {
             get => message;

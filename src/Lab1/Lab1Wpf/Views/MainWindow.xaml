@@ -16,6 +16,13 @@
             <Button Content="Шифровать" Command="{Binding SendCommand}" Margin="5,5,5,5" IsEnabled="{Binding KeysGenerated}"/>
             <Button Content="Дешифровать" Command="{Binding DecrypteCommand}" Margin="5,5,5,5"/>
         </ToolBar>
+        <StatusBar DockPanel.Dock="Bottom">
+            <TextBlock Text="{Binding StringFormat='P = {0} |', Path=P}"/>
+            <TextBlock Text="{Binding StringFormat='Q = {0} |', Path=Q}"/>
+            <TextBlock Text="{Binding StringFormat='N = {0} |', Path=N}"/>
+            <TextBlock Text="{Binding StringFormat='E = {0} |', Path=E}"/>
+            <TextBlock Text="{Binding StringFormat='D = {0} |', Path=D}"/>
+        </StatusBar>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition/>

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,6 +73,12 @@ namespace Lab1Wpf.ModelViews
             LogString += (e.Message + '\n');
         }
 
+        public uint P => model.P;
+        public uint Q => model.Q;
+        public BigInteger D => model.D;
+        public BigInteger E => model.E;
+        public BigInteger N => model.N;
+
         public string MessageToCrypt
         {
             get => model.Message;
@@ -82,13 +89,9 @@ namespace Lab1Wpf.ModelViews
             }
         }
 
-        //public ImmutableArray<ImmutableArray<ulong>> CryptedMessage
-        //public ulong[][] CryptedMessage
-        //public List<CryptedList> CryptedMessage
+
         public string[][] CryptedMessage
         {
-            //get => model.CryptedMessage;
-            //get => new ulong[][] { new ulong[] { 4, 5,7 ,}, new ulong[] { 4, 63,2 ,1}, new ulong[] { 4, 63, 5 } };
             get => cryptedValues;
         }
 
@@ -132,7 +135,11 @@ namespace Lab1Wpf.ModelViews
         {
             model.GenerateKeys();
 
-            
+            OnPropertyChanged(nameof(P));
+            OnPropertyChanged(nameof(Q));
+            OnPropertyChanged(nameof(E));
+            OnPropertyChanged(nameof(D));
+            OnPropertyChanged(nameof(N));
 
             OnPropertyChanged(nameof(KeysGenerated));
             OnPropertyChanged(nameof(CryptedMessage));
@@ -141,40 +148,6 @@ namespace Lab1Wpf.ModelViews
         public void Send()
         {
             model.SendMessage();
-
-            //cryptedValues.Clear();
-
-            //foreach (ImmutableArray<ulong> list in model.CryptedMessage)
-            //{
-            //    List<CryptedValue> innnerList = new List<CryptedValue>(list.Count());
-
-            //    foreach (ulong item in list)
-            //    {
-            //        innnerList.Add(new CryptedValue() { Value = item });
-            //    }
-
-            //    cryptedValues.Add(new CryptedList() { List = innnerList });
-            //}
-
-            /*
-            cryptedValues = new string[model.CryptedMessage.Length];
-
-            for (int i = 0; i < model.CryptedMessage.Length; i++)
-            {
-                //List<CryptedValue> innnerList = new List<CryptedValue>(list.Count());
-                StringBuilder stringBuilder = new StringBuilder(2);
-
-                foreach (ulong item in model.CryptedMessage[i])
-                {
-                    //innnerList.Add(new CryptedValue() { Value = item });
-                    stringBuilder.Append(item);
-                    stringBuilder.Append(';');
-                }
-
-                //cryptedValues.Add(new CryptedList() { List = innnerList });
-                cryptedValues[i] = stringBuilder.ToString();
-            }
-            */
 
             cryptedValues = new string[model.CryptedMessage.Length][];
 
