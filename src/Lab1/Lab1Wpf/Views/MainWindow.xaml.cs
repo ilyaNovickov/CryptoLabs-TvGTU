@@ -21,13 +21,13 @@ namespace Lab1Wpf
     /// </summary>
     public partial class MainWindow : Window
     {
-        private MainWindowModelView modelView = new MainWindowModelView();
+        //private MainWindowModelView modelView = new MainWindowModelView();
 
         public MainWindow()
         {
             InitializeComponent();
 
-            this.DataContext = modelView;
+            //this.DataContext = modelView;
         }
     }
 }

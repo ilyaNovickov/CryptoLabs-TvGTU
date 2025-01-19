@@ -4,29 +4,73 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Lab1Wpf"
+        xmlns:data="clr-namespace:Lab1Wpf.ModelViews"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <GroupBox Header="Сообщение">
-                <TextBox TextWrapping="NoWrap" 
+    <Window.DataContext>
+        <data:MainWindowModelView/>
+    </Window.DataContext>
+    <DockPanel LastChildFill="True">
+        <ToolBar DockPanel.Dock="Top">
+            <Button Content="Сгенерировать ключи" Command="{Binding KeysGenerateCommand}" Margin="5,5,5,5"/>
+            <Button Content="Шифровать" Command="{Binding SendCommand}" Margin="5,5,5,5" IsEnabled="{Binding KeysGenerated}"/>
+            <Button Content="Дешифровать" Command="{Binding DecrypteCommand}" Margin="5,5,5,5"/>
+        </ToolBar>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="0.2*"/>
+                    </Grid.RowDefinitions>
+                    <GroupBox Header="Сообщение" Grid.Row="0">
+                        <TextBox TextWrapping="NoWrap" 
                          AcceptsReturn="True" 
                          HorizontalScrollBarVisibility="Visible" 
-                         VerticalScrollBarVisibility="Visible"/>
-            </GroupBox>
-            <ListBox Grid.Column="1" ItemsSource="{Binding CryptedMessage}">
-                
-            </ListBox>
+                         VerticalScrollBarVisibility="Visible"
+                         Text="{Binding MessageToCrypt, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="{Binding MaxMessageLength}"/>
+                    </GroupBox>
+                    <StackPanel Grid.Row="1" Orientation="Vertical">
+                        <TextBlock Text="{Binding StringFormat='Длина сообщения \{0\,5}\ символов', Path=MessageToCrypt.Length}"/>
+                    </StackPanel>
+                </Grid>
+                <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Disabled">
+                    <ListBox  ItemsSource="{Binding CryptedMessage}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <ListBox ItemsSource="{Binding}" BorderThickness="3">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </ScrollViewer>
+                <GroupBox Grid.Column="2" Header="Дешифрация">
+                    <TextBox Text="{Binding DecryptedMessage, Mode=OneWay}" TextWrapping="NoWrap" HorizontalScrollBarVisibility="Visible" 
+                             VerticalScrollBarVisibility="Visible" IsReadOnly="True"/>
+                </GroupBox>
 
+            </Grid>
+            <TextBox Grid.Row="1" IsReadOnly="True" 
+                     Margin="5,5,5,5" BorderThickness="3" 
+                     TextWrapping="NoWrap"
+                     HorizontalScrollBarVisibility="Visible"
+                     VerticalScrollBarVisibility="Visible"
+                     Text="{Binding LogString}"/>
         </Grid>
-    </Grid>
+    </DockPanel>
 </Window>

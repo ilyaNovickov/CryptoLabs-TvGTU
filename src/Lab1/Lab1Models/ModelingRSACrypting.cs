@@ -274,8 +274,8 @@ sign:
                     //Сохряняем предыдущий расшифрованый символ
                     prevCode = decryptedCode;
 
-                    LoggingEvent?.Invoke(this, new LogEventArgs($"Окончание дешифрации сообщения №{messageNumber}"));
                 }
+                LoggingEvent?.Invoke(this, new LogEventArgs($"Окончание дешифрации сообщения №{messageNumber}"));
             }
 
             LoggingEvent?.Invoke(this, new LogEventArgs("Конец дешифрации сообщений"));
