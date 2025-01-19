@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
+using System.Reflection;
 
 namespace Lab1CMD
 {
@@ -74,41 +76,64 @@ namespace Lab1CMD
 
         static void Main(string[] args)
         {
-            ModelingRSACrypting model = new ModelingRSACrypting();
+            //ModelingRSACrypting model = new ModelingRSACrypting();
 
 
 
-            for (int i = 0; i < 1000000000; i++)
-            {
-                foreach (string str in strs)
-                {
-                    model.Message = str;
-
-                    model.GenerateKeys();
-                    model.SendMessage();
-                    var test = model.ReadMessage();
-                }
-            }
-
-
-            //Console.WriteLine("Шифр");
-            //foreach (var me in model.CryptedMessage)
+            //for (int i = 0; i < 1000000000; i++)
             //{
-            //    foreach (ulong item in me)
+            //    foreach (string str in strs)
             //    {
-            //        Console.Write(item + ";");
+            //        model.Message = str;
+
+            //        model.GenerateKeys();
+            //        model.SendMessage();
+            //        var test = model.ReadMessage();
             //    }
-            //    Console.WriteLine();
             //}
-            //Console.WriteLine("---------");
 
+            uint p = 48847;
+            uint q = 62099;
+            BigInteger n = p * q;
+            BigInteger eln = (BigInteger)(p - 1) * (BigInteger)(q - 1);
 
+            BigInteger e = 534368047;
 
-            //Console.WriteLine("Сообщение");
-            //Console.WriteLine(model.ReadMessage());
-            //Console.WriteLine("---------");
+            BigInteger d = FindD(e, eln);
+
+            BigInteger m = (e * d) % eln;
+
+            MathExtra.ExtendedEvklidAlgorithm(e, eln, out BigInteger x, out BigInteger y);
+
+            BigInteger min = BigInteger.Min(x, y);
+
+            BigInteger d2 = eln - BigInteger.Abs(min);
+
+            BigInteger m2 = (e * d2) % eln;
+
 
             Console.ReadLine();
+        }
+
+        static BigInteger FindD(BigInteger e, BigInteger phi)
+        {
+            var (gcd, x, y) = ExtendedGCD(e, phi);
+            if (gcd != 1)
+                throw new ArgumentException("e и φ(n) должны быть взаимно простыми");
+
+            // d должно быть положительным
+            return (x % phi + phi) % phi;
+        }
+
+        static (BigInteger gcd, BigInteger x, BigInteger y) ExtendedGCD(BigInteger a, BigInteger b)
+        {
+            if (b == 0)
+                return (a, 1, 0);
+
+            var (gcd, x1, y1) = ExtendedGCD(b, a % b);
+            BigInteger x = y1;
+            BigInteger y = x1 - (a / b) * y1;
+            return (gcd, x, y);
         }
 
 

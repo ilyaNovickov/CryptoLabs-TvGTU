@@ -124,11 +124,10 @@ sign:
 
             //Определение ключа d
             {
-                MathExtra.ExtendedEvklidAlgorithm(eln, e, out BigInteger x, out BigInteger y);
+                MathExtra.ExtendedEvklidAlgorithm(e, eln, out BigInteger x, out BigInteger y);
 
-                BigInteger min = BigInteger.Min(x, y);
 
-                d = eln - BigInteger.Abs(min);
+                d = (x % eln + eln) % eln;
 
                 //Возможны ситуации, когда алгоритм находит 
                 //такое d, которое не удовлетворяет требуемому
