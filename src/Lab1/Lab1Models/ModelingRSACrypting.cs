@@ -24,7 +24,30 @@ namespace Lab1Models
 
         private ImmutableArr cryptedMessage = ImmutableArr.Empty;
 
-        private List<Test> tests = new List<Test>();
+        private List<CryptFix> fixList = new List<CryptFix>();
+
+        private static List<char> avaibleChars;
+
+        static ModelingRSACrypting()
+        {
+            //Определение набора данных
+            avaibleChars = new List<char>();
+
+            for (char i = '\u0000'; i <= '\u00bf'; i++)
+            {
+                avaibleChars.Add(i);
+            }
+            for (char i = '\u02b9'; i <= '\u035f'; i++)
+            {
+                avaibleChars.Add(i);
+            }
+            for (char i = '\u0410'; i <= '\u0482'; i++)
+            {
+                avaibleChars.Add(i);
+            }
+
+
+        }
 
         public uint P => p;
         public uint Q => q;
@@ -39,8 +62,13 @@ namespace Lab1Models
             {
                 if (value.Length > messageMaxLength)
                     throw new Exception($"Максимальная длина одного сообщения должшо не превышать {messageMaxLength} символов");
+
+                if (value.ToCharArray().Except(avaibleChars).Count() != 0)
+                    return;
+
                 message = value;
                 CryptedMessage.Clear();
+                fixList.Clear();
             }
         }
 
@@ -80,7 +108,8 @@ sign:
 //Генерация p
             do
             {
-                p = rnd.NextUint(0U, ushort.MaxValue);
+                //p = rnd.NextUint(0U, ushort.MaxValue);
+                p = rnd.NextUint(500, 1000);
             } while (!MathExtra.IsPrime(p));
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число p := {p}"));
@@ -88,7 +117,8 @@ sign:
             //Генерация q
             do
             {
-                q = rnd.NextUint(0U, ushort.MaxValue);
+                //q = rnd.NextUint(0U, ushort.MaxValue);
+                q = rnd.NextUint(500, 1000);
             } while (!MathExtra.IsPrime(q) || p == q);
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число q := {q}"));
@@ -102,7 +132,7 @@ sign:
             //то их можно представить как числа от 0 до 2^16 - 1 (т. е. ushort)
             //Значит, что n должен быть больше ushort.MaxValue, чтобы 
             //можно было закодировать все символы
-            if (n <= ushort.MaxValue * lengthofOneMessage)
+            if (n <= ushort.MaxValue) //* lengthofOneMessage)
             {
                 LoggingEvent?.Invoke(null, new LogEventArgs($"Модуль n = {n} не может закодировать все символьные литералы кодировки UniCode\n" +
                     $"Повторная генерация p и q"));
@@ -117,7 +147,7 @@ sign:
             //Определение ключа e
             do
             {
-                e = rnd.NextUint(0U, uint.MaxValue);
+                e = rnd.NextUint(0U, (uint)eln);
             } while (!MathExtra.FindMutuallyPrimeNumbers(e, eln) || !(1 < e && e < eln));
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число e := {e}"));
@@ -178,9 +208,6 @@ sign:
                 //Шифромассив
                 List<ulong> cryptedMessage = new List<ulong>(lengthofOneMessage);
 
-                //Предыдущий код
-                BigInteger prevCode = 0;
-
                 for (int i = 0; i < messagePart.Length; i++)
                 {
                     BigInteger code = 0;
@@ -190,33 +217,32 @@ sign:
                     //b = (b + a) % n, где a - это превыдущий код числа 
 
                     //Перекодировка символов
-                    if (i == 0)
-                        code = messagePart[i];
-                    else
-                        code = (messagePart[i] + prevCode) % n;
+                    code = avaibleChars.IndexOf(messagePart[i]);
 
-                    //Сохранение предыдущего символа
-                    prevCode = code;
-
+                    if (code == -1)
+                        throw new Exception("Ошибка кодировки");
+                    recode:
                     //Кодируем символ
-                    code = MathExtra.ModularExponentiation(code, e, n);
+                    BigInteger crypt = MathExtra.ModularExponentiation(code, e, n);
 
                     //На случай, если в шифросообщение есть повторяющиеся символы
-                    if (cryptedMessage.Contains((ulong)code))
+                    if (cryptedMessage.Contains((ulong)crypt))
                     {
-                        throw new Exception("oops");
-
-                        Test test = new Test()
+                        CryptFix test = new CryptFix()
                         {
                             Index = cryptedMessage.IndexOf((ulong)code),
                             NumbeofMessage = messageNumber
                         };
-                        tests.Add(test);
+                        fixList.Add(test);
+
+                        code = code + avaibleChars.Count;
+
+                        goto recode;
                     }
 
 
                     //Кодируем сообщение
-                    cryptedMessage.Add((ulong)code);
+                    cryptedMessage.Add((ulong)crypt);
                 }
 
                 //Сохраняем шифрсообщение
@@ -249,9 +275,6 @@ sign:
                 //Шифрсообщение
                 ImmutableArray<ulong> oneMessage = cryptedMessage[messageNumber];
 
-                //Код предыдущего сооьщения
-                long prevCode = 0;
-
                 for (int i = 0; i < oneMessage.Length; i++)
                 {
                     //Расшифровка сообщения
@@ -263,22 +286,9 @@ sign:
                         continue;
                     }
 
-                    //За каждым символьным литералом скрывается число от 0 до 2^16 - 1
-                    //Так как числа могут часто повторяться, то числа кодируюся как
-                    //b = (b + a) % n, где a - это превыдущий код числа (ДО КОДИРОВКИ)
-                    //Для расшифровку использую формулу
-                    //b = (b - a) % n, где a - это предыдущий символ ДО КОДИРОВКИ
-                    //а это значит, что после этой расшифроки
-
                     //Расшифровка символов
-                    if (i == 0)
-                        decryptedMessage += (char)(decryptedCode);
-                    else
-                        decryptedMessage += (char)((decryptedCode - prevCode) % n);
-
-                    //Сохряняем предыдущий расшифрованый символ
-                    prevCode = decryptedCode;
-
+                    //decryptedMessage += (char)(decryptedCode);
+                    decryptedMessage += avaibleChars[(int)decryptedCode];
                 }
                 LoggingEvent?.Invoke(this, new LogEventArgs($"Окончание дешифрации сообщения №{messageNumber}"));
             }
@@ -308,7 +318,7 @@ sign:
         }
 
         
-        struct Test
+        struct CryptFix
         {
             public int NumbeofMessage { get; set; }
             public int Index { get; set; }
