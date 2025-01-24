@@ -16,31 +16,33 @@ namespace Lab1Models
         private const int messageMaxLength = 8192;
         private const int lengthofOneMessage = 512;
 
+        //Нижная и верхняя границы поиска простых чисел
         private const int lowerBound = 500;
         private const int higherBound = 1000;
 
-        //private int maxModCode = 0;
+        //Максимальное число двоичных разрядов для шифрования
         private int maxModBinCount = 0;
-
+        //Длина двоичного представления кода символа
         private static int charBinLength = 0;
 
+        //Параметры RSA
         private uint p = 0;
         private uint q = 0;
         private BigInteger n = 0;
         private BigInteger d = 0;
         private BigInteger e = 0;
 
+        //Сообщение для шифрования
         private string message = null;
 
+        //Список зашифрованых сообщений
         private ImmutableArr cryptedMessage = ImmutableArr.Empty;
-
-        private List<CryptFix> fixList = new List<CryptFix>();
-
+        //Список доступных для шифроапния символов
         private static List<char> avaibleChars;
 
         static ModelingRSACrypting()
         {
-            //Определение набора данных
+            //Определение набора символов
             avaibleChars = new List<char>();
 
             for (char i = '\u0000'; i <= '\u00bf'; i++)
@@ -57,6 +59,7 @@ namespace Lab1Models
             }
             //count : 474 => bin max : 521 = 0b 1 1111 1111
 
+            //Подсчёт двоичной длины числа
             int binCounter = 0;
             int count = avaibleChars.Count;
 
@@ -75,6 +78,10 @@ namespace Lab1Models
         public BigInteger D => d;
         public BigInteger E => e;
 
+        /// <summary>
+        /// Сообщение для шифрования
+        /// При изменение сбрасывается шифр
+        /// </summary>
         public string Message
         {
             get => message;
@@ -83,32 +90,51 @@ namespace Lab1Models
                 if (value.Length > messageMaxLength)
                     throw new Exception($"Максимальная длина одного сообщения должшо не превышать {messageMaxLength} символов");
 
+                //Если есть недоступный для шифрования символ
+                //то сообщение не изменяется
                 if (value.ToCharArray().Except(avaibleChars).Count() != 0)
                     return;
 
                 message = value;
                 CryptedMessage.Clear();
-                fixList.Clear();
             }
         }
 
+        /// <summary>
+        /// Набор зафированых сообщений
+        /// </summary>
         public ImmutableArr CryptedMessage
         {
             get => cryptedMessage;
             private set => cryptedMessage = value;
         }
 
+        /// <summary>
+        /// Определяет, сгенерированы ли ключи RSA
+        /// </summary>
         public bool KeysGenerated
         {
             get; private set;
         }
 
+        /// <summary>
+        /// Максимальная длина одного сообщения
+        /// </summary>
         public int LengthOfOneMessage => lengthofOneMessage;
 
+        /// <summary>
+        /// Максимальная длина всего сообщения
+        /// </summary>
         public int MessageMaxLength => messageMaxLength;
 
+        /// <summary>
+        /// Событие логгирования
+        /// </summary>
         public event LogEventHandler LoggingEvent;
 
+        /// <summary>
+        /// Генерация ключей RSA
+        /// </summary>
         public void GenerateKeys()
         {
             GenerateKeys(ref p, ref q, ref n, ref e, ref d);
@@ -116,6 +142,9 @@ namespace Lab1Models
             KeysGenerated = true;
         }
 
+        /// <summary>
+        /// Определение максимального модификатора сообщений
+        /// </summary>
         private void SetExtraValues()
         {
             int t = ((int)N);
@@ -227,6 +256,23 @@ sign:
             SetExtraValues();
         }
 
+        /*
+         * RSA алгоритм может кодировать сиволы в интервале от 0 до n-1
+         * Код символа сдвигается на несколько разрядов влево
+         * чтобы первые разряды были кодом символа, а остальная часть была модификатором
+         * Модификатор заполнается числом, равным кол-во символов
+         * 
+         * Пример:
+         * Символ с кодом 511 (0b0001 1111 1111)
+         * n = 8 191 (0b0001 1111 1111 1111)
+         * Чтобы были место для мановрёв, сдвиг будет происходить до самого старшего значимого бита
+         * Смещает:
+         * 0b0000 0001 1111 1111 << Значение сдвига = 0b0000 1111 1111 1111 1???
+         * В ? будет храниться модификатор; здесь модификатор будет определён в интервале
+         * от 0b000 до 0b111.
+         * Если достигнут максимальный модификатор, то происходит кодировка нового сообщения
+         * (одно исходное сообщение кодируется в несколько зашифрованых)
+         */
         public void SendMessage()
         {
             if (!KeysGenerated)
@@ -240,17 +286,16 @@ sign:
 
             LoggingEvent?.Invoke(this, new LogEventArgs("Начало кодировки сообщений"));
 
-            Dictionary<char, uint> modDictionary = new Dictionary<char, uint>();
-
             List<uint> cryptedMessage = new List<uint>();
 
-            int countofMessage = 1;
-            int messageIndex = 0;
-
-            
+            int countofMessage = 1;//Кол-во сообщений
+            int messageIndex = 0;//Индекс символа сообщения
 
             for (int messageToCrypt = 0; messageToCrypt < countofMessage; messageToCrypt++)
             {
+                LoggingEvent?.Invoke(this, new LogEventArgs($"Кодировка сообщения №{messageToCrypt}"));
+
+                Dictionary<char, uint> modDictionary = new Dictionary<char, uint>();
                 List<uint> cryptedValues = new List<uint>();
 
                 for (; messageIndex < message.Length; messageIndex++)
@@ -259,6 +304,7 @@ sign:
 
                     uint code = 0;
 
+                    //Определение кода символа
                     {
                         int codeYoCrypt = avaibleChars.IndexOf(symbol);
 
@@ -279,13 +325,8 @@ sign:
                         int maxVal = MathExtra.PowInt(2, maxModBinCount - charBinLength) - 1;
                         int modificator = (int)modDictionary[symbol];
 
-                        //if (modDictionary[symbol] != maxVal)
                         if (modificator != maxVal)
                         {
-                            //code = modDictionary[symbol];
-                            //code += 1;
-                            //modDictionary[symbol] = code;
-
                             code += ((uint)modificator + 1);
                             modDictionary[symbol] = (uint)modificator + 1;
                         }
@@ -307,6 +348,8 @@ sign:
                 }
 
                 builder.Add(cryptedValues.ToImmutableArray<uint>());
+
+                LoggingEvent?.Invoke(this, new LogEventArgs($"Конец кодировки сообщения №{messageToCrypt}"));
             }
 
 

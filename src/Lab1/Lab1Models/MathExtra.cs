@@ -246,6 +246,12 @@ namespace Lab1Models
             return (n >= lowerBound && n < upperBound);
         }
 
+        /// <summary>
+        /// Получение степени в виде 32-х разрядного числа со знаком
+        /// </summary>
+        /// <param name="x">Параметр</param>
+        /// <param name="y">Показатель</param>
+        /// <returns>Результат</returns>
         public static int PowInt(int x, int y)
         {
             if (y == 0)
