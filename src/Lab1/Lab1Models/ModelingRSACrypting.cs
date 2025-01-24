@@ -5,14 +5,24 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using ImmutableArr = System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<ulong>>;
+using ImmutableArr = System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<uint>>;
 
+//500 * 500 = 250.000 ( 0b11 1101 0000 1001 0000 ) =>
+//=> 131.071 
 namespace Lab1Models
 {
     public class ModelingRSACrypting
     {
         private const int messageMaxLength = 8192;
         private const int lengthofOneMessage = 512;
+
+        private const int lowerBound = 500;
+        private const int higherBound = 1000;
+
+        //private int maxModCode = 0;
+        private int maxModBinCount = 0;
+
+        private static int charBinLength = 0;
 
         private uint p = 0;
         private uint q = 0;
@@ -45,8 +55,18 @@ namespace Lab1Models
             {
                 avaibleChars.Add(i);
             }
+            //count : 474 => bin max : 521 = 0b 1 1111 1111
 
+            int binCounter = 0;
+            int count = avaibleChars.Count;
 
+            while (count != 0)
+            {
+                count >>= 1;
+                binCounter++;
+            }
+
+            charBinLength = binCounter;
         }
 
         public uint P => p;
@@ -96,6 +116,29 @@ namespace Lab1Models
             KeysGenerated = true;
         }
 
+        private void SetExtraValues()
+        {
+            int t = ((int)N);
+
+            t >>= 1;
+
+            int counterBin = 0;
+            int maxValue = 1;
+
+            while (t != 0)
+            {
+                counterBin++;
+                t >>= 1;
+                maxValue *= 2;
+            }
+
+            maxValue -= 1;
+            //counterBin -= 1;
+
+            //this.maxModCode = maxValue;
+            this.maxModBinCount = counterBin;
+        }
+
         private void GenerateKeys(ref uint p, ref uint q, ref BigInteger n, 
             ref BigInteger e, ref BigInteger d)
         {
@@ -109,7 +152,8 @@ sign:
             do
             {
                 //p = rnd.NextUint(0U, ushort.MaxValue);
-                p = rnd.NextUint(500, 1000);
+                //p = rnd.NextUint(500, 1000);
+                p = 601;
             } while (!MathExtra.IsPrime(p));
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число p := {p}"));
@@ -118,7 +162,8 @@ sign:
             do
             {
                 //q = rnd.NextUint(0U, ushort.MaxValue);
-                q = rnd.NextUint(500, 1000);
+                //q = rnd.NextUint(500, 1000);
+                q = 883;
             } while (!MathExtra.IsPrime(q) || p == q);
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число q := {q}"));
@@ -178,6 +223,8 @@ sign:
             }
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Генерация ключей завершина"));
+
+            SetExtraValues();
         }
 
         public void SendMessage()
@@ -188,71 +235,82 @@ sign:
             if (message == null || message.Length == 0)
                 throw new Exception("Сообщение для отправки отсуствует");
 
-            //Разрезание 1-ого сообщения на несколько определённой длины
-            string[] littleMessage = CuttingMessage(message);
-
-            LoggingEvent?.Invoke(this, new LogEventArgs($"Сообщение было разделено на {littleMessage.Length} подсообщений {lengthofOneMessage} символов каждое"));
-
             this.CryptedMessage = ImmutableArr.Empty;
             ImmutableArr.Builder builder = this.CryptedMessage.ToBuilder();
 
             LoggingEvent?.Invoke(this, new LogEventArgs("Начало кодировки сообщений"));
 
-            for (int messageNumber = 0; messageNumber < littleMessage.Length; messageNumber++)
+            Dictionary<char, uint> modDictionary = new Dictionary<char, uint>();
+
+            List<uint> cryptedMessage = new List<uint>();
+
+            int countofMessage = 1;
+            int messageIndex = 0;
+
+            
+
+            for (int messageToCrypt = 0; messageToCrypt < countofMessage; messageToCrypt++)
             {
-                LoggingEvent?.Invoke(this, new LogEventArgs($"Шифрация сообщения №{messageNumber}"));
+                List<uint> cryptedValues = new List<uint>();
 
-                //Сообщение для шифрования
-                string messagePart = littleMessage[messageNumber];
-
-                //Шифромассив
-                List<ulong> cryptedMessage = new List<ulong>(lengthofOneMessage);
-
-                for (int i = 0; i < messagePart.Length; i++)
+                for (; messageIndex < message.Length; messageIndex++)
                 {
-                    BigInteger code = 0;
+                    char symbol = message[messageIndex];
 
-                    //За каждым символьным литералом скрывается число от 0 до 2^16 - 1
-                    //Так как числа могут часто повторяться, то числа кодируюся как
-                    //b = (b + a) % n, где a - это превыдущий код числа 
+                    uint code = 0;
 
-                    //Перекодировка символов
-                    code = avaibleChars.IndexOf(messagePart[i]);
-
-                    if (code == -1)
-                        throw new Exception("Ошибка кодировки");
-                    recode:
-                    //Кодируем символ
-                    BigInteger crypt = MathExtra.ModularExponentiation(code, e, n);
-
-                    //На случай, если в шифросообщение есть повторяющиеся символы
-                    if (cryptedMessage.Contains((ulong)crypt))
                     {
-                        CryptFix test = new CryptFix()
-                        {
-                            Index = cryptedMessage.IndexOf((ulong)code),
-                            NumbeofMessage = messageNumber
-                        };
-                        fixList.Add(test);
+                        int codeYoCrypt = avaibleChars.IndexOf(symbol);
 
-                        code = code + avaibleChars.Count;
+                        if (codeYoCrypt == -1)
+                            throw new Exception("Недоступный для шифрования символ");
 
-                        goto recode;
+                        code = (uint)codeYoCrypt;
                     }
 
+                    code <<= (maxModBinCount - charBinLength);
 
-                    //Кодируем сообщение
-                    cryptedMessage.Add((ulong)crypt);
+                    if (!modDictionary.ContainsKey(symbol))
+                    {
+                        modDictionary.Add(symbol, 0u);
+                    }
+                    else
+                    {
+                        int maxVal = MathExtra.PowInt(2, maxModBinCount - charBinLength) - 1;
+                        int modificator = (int)modDictionary[symbol];
+
+                        //if (modDictionary[symbol] != maxVal)
+                        if (modificator != maxVal)
+                        {
+                            //code = modDictionary[symbol];
+                            //code += 1;
+                            //modDictionary[symbol] = code;
+
+                            code += ((uint)modificator + 1);
+                            modDictionary[symbol] = (uint)modificator + 1;
+                        }
+                        else
+                        {
+                            countofMessage++;
+                            //builder.Add(cryptedValues.ToImmutableArray<uint>());
+                            //cryptedValues.Clear();
+                            //uint cryptedValue2 = (uint)MathExtra.ModularExponentiation(code, e, n);
+                            //cryptedValues.Add(cryptedValue2);
+                            modDictionary.Clear();
+                            break;
+                        }
+                    }
+
+                    uint cryptedValue = (uint)MathExtra.ModularExponentiation(code, e, n);
+                    cryptedValues.Add(cryptedValue);
+                    
                 }
 
-                //Сохраняем шифрсообщение
-                builder.Add(cryptedMessage.ToImmutableArray<ulong>());
-
-                LoggingEvent?.Invoke(this, new LogEventArgs($"Окончание шифрации сообщения №{messageNumber}"));
+                builder.Add(cryptedValues.ToImmutableArray<uint>());
             }
 
-            CryptedMessage = builder.ToImmutable();
 
+            CryptedMessage = builder.ToImmutableArray();
             LoggingEvent?.Invoke(this, new LogEventArgs("Сообщение закодировано"));
         }
 
@@ -273,23 +331,19 @@ sign:
                 LoggingEvent?.Invoke(this, new LogEventArgs($"Дешифрация сообщения №{messageNumber}"));
 
                 //Шифрсообщение
-                ImmutableArray<ulong> oneMessage = cryptedMessage[messageNumber];
+                ImmutableArray<uint> oneMessage = cryptedMessage[messageNumber];
 
                 for (int i = 0; i < oneMessage.Length; i++)
                 {
-                    //Расшифровка сообщения
-                    long decryptedCode = (long)MathExtra.ModularExponentiation(oneMessage[i], d, n);
+                    uint decode = (uint)MathExtra.ModularExponentiation(oneMessage[i], d, n);
 
-                    //Ести код равень 0, то переход к следующему символу
-                    if (decryptedCode == 0)
-                    {
-                        continue;
-                    }
+                    decode >>= maxModBinCount - charBinLength;
 
-                    //Расшифровка символов
-                    //decryptedMessage += (char)(decryptedCode);
-                    decryptedMessage += avaibleChars[(int)decryptedCode];
+                    char symbol = avaibleChars[(int)decode];
+
+                    decryptedMessage += symbol;
                 }
+
                 LoggingEvent?.Invoke(this, new LogEventArgs($"Окончание дешифрации сообщения №{messageNumber}"));
             }
 

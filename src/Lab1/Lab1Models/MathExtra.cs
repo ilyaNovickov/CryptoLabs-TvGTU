@@ -245,5 +245,23 @@ namespace Lab1Models
 
             return (n >= lowerBound && n < upperBound);
         }
+
+        public static int PowInt(int x, int y)
+        {
+            if (y == 0)
+                return 0;
+
+            int res = 1;
+
+            while (y != 0)
+            {
+                res *= x;
+                y--;
+            }
+
+            return res;
+
+
+        }
     }
 }
