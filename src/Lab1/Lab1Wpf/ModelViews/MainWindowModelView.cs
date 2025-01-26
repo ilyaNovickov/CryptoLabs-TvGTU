@@ -34,6 +34,8 @@ namespace Lab1Wpf.ModelViews
         {
             get => send ?? (send = new RelayCommand((obj) => 
             {
+                if (model.Message == null || model.Message == "")
+                    return;
                 Send();
             }));
         }

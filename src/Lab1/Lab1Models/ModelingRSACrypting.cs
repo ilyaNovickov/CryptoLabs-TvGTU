@@ -181,8 +181,8 @@ sign:
             do
             {
                 //p = rnd.NextUint(0U, ushort.MaxValue);
-                //p = rnd.NextUint(500, 1000);
-                p = 601;
+                p = rnd.NextUint(lowerBound, higherBound);
+                //p = 601;
             } while (!MathExtra.IsPrime(p));
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число p := {p}"));
@@ -191,8 +191,8 @@ sign:
             do
             {
                 //q = rnd.NextUint(0U, ushort.MaxValue);
-                //q = rnd.NextUint(500, 1000);
-                q = 883;
+                q = rnd.NextUint(lowerBound, higherBound);
+                //q = 883;
             } while (!MathExtra.IsPrime(q) || p == q);
 
             LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число q := {q}"));
