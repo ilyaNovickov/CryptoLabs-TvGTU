@@ -144,7 +144,9 @@ namespace Lab1Wpf.ModelViews
             OnPropertyChanged(nameof(N));
 
             OnPropertyChanged(nameof(KeysGenerated));
+            cryptedValues = new string[0][];
             OnPropertyChanged(nameof(CryptedMessage));
+            this.DecryptedMessage = "";
         }
 
         public void Send()

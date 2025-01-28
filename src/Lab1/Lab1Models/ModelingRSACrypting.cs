@@ -137,6 +137,8 @@ namespace Lab1Models
         /// </summary>
         public void GenerateKeys()
         {
+            CryptedMessage = CryptedMessage.Clear();
+
             GenerateKeys(ref p, ref q, ref n, ref e, ref d);
 
             KeysGenerated = true;
