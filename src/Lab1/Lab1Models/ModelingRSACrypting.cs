@@ -221,17 +221,18 @@ sign:
             //Определение ключа e
             do
             {
-                e = rnd.NextUint(0U, (uint)eln);
-            } while (!MathExtra.FindMutuallyPrimeNumbers(e, eln) || !(1 < e && e < eln));
+                //e = rnd.NextUint(0U, (uint)eln);
+                d = rnd.NextUint(0U, (uint)eln);
+            } while (!MathExtra.FindMutuallyPrimeNumbers(d, eln) || !(1 < d && d < eln));
 
-            LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число e := {e}"));
+            LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число d := {d}"));
 
             //Определение ключа d
             {
-                MathExtra.ExtendedEvklidAlgorithm(e, eln, out BigInteger x, out BigInteger y);
+                MathExtra.ExtendedEvklidAlgorithm(d, eln, out BigInteger x, out BigInteger y);
 
 
-                d = (x % eln + eln) % eln;
+                e = (x % eln + eln) % eln;
 
                 //Возможны ситуации, когда алгоритм находит 
                 //такое d, которое не удовлетворяет требуемому
@@ -239,12 +240,12 @@ sign:
                 //Тогда требуется перезапуск алгоритма
                 BigInteger modTest = (d * e) % eln;
 
-                LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число d := {d}\n" +
+                LoggingEvent?.Invoke(null, new LogEventArgs($"Сгенерировано число e := {e}\n" +
                     $"Проверка (d * e) mod Ф = {modTest}"));
 
                 if (modTest != 1)
                 {
-                    LoggingEvent?.Invoke(null, new LogEventArgs($"Число d не соотведствует требованиям " +
+                    LoggingEvent?.Invoke(null, new LogEventArgs($"Число e не соотведствует требованиям " +
                         $"=> Повторная генерация ключей"));
                     goto sign;
                 }
