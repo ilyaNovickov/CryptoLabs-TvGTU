@@ -1,14 +1,8 @@
 ﻿using Lab1Models;
 using Lab1Wpf.Commands;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.ComponentModel;
-using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lab1Wpf.ModelViews
 {
@@ -32,7 +26,7 @@ namespace Lab1Wpf.ModelViews
 
         public RelayCommand SendCommand
         {
-            get => send ?? (send = new RelayCommand((obj) => 
+            get => send ?? (send = new RelayCommand((obj) =>
             {
                 if (model.Message == null || model.Message == "")
                     return;
@@ -67,7 +61,7 @@ namespace Lab1Wpf.ModelViews
 
         public MainWindowModelView()
         {
-            model.LoggingEvent += Model_LoggingEvent; 
+            model.LoggingEvent += Model_LoggingEvent;
         }
 
         private void Model_LoggingEvent(object sender, LogEventArgs e)
@@ -128,7 +122,7 @@ namespace Lab1Wpf.ModelViews
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void OnPropertyChanged([CallerMemberName]string message = "")
+        private void OnPropertyChanged([CallerMemberName] string message = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(message));
         }

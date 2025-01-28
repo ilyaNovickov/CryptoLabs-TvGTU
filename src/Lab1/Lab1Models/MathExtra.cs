@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lab1Models
 {
@@ -79,7 +76,7 @@ namespace Lab1Models
             List<ulong> primes = new List<ulong>();
 
             // Если начало интервала меньше 2, начинаем с 2
-            if (start < 2) 
+            if (start < 2)
                 start = 2;
 
             for (ulong number = start; number <= end; number++)
@@ -100,11 +97,11 @@ namespace Lab1Models
         public static bool IsPrime(BigInteger number)
         {
             // 1 не является простым числом
-            if (number < 2) 
+            if (number < 2)
                 return false;
 
             // Проверка на делимость на 2
-            if (number % 2 == 0 && number != 2) 
+            if (number % 2 == 0 && number != 2)
                 return false;
 
             // Проверяем делители от 3 до √number
@@ -142,8 +139,8 @@ namespace Lab1Models
         {
             if (a < b)
             {
-                BigInteger temp = a; 
-                a = b; 
+                BigInteger temp = a;
+                a = b;
                 b = temp;
             }
 
@@ -211,7 +208,7 @@ namespace Lab1Models
         /// <exception cref="ArithmeticException">Результат неопределён (NaN)</exception>
         public static BigInteger Sqrt(this BigInteger n)
         {
-            if (n == 0) 
+            if (n == 0)
                 return 0;
 
             if (n > 0)

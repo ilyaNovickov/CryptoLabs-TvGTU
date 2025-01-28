@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using ImmutableArr = System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<uint>>;
 
 //500 * 500 = 250.000 ( 0b11 1101 0000 1001 0000 ) =>
@@ -170,7 +168,7 @@ namespace Lab1Models
             this.maxModBinCount = counterBin;
         }
 
-        private void GenerateKeys(ref uint p, ref uint q, ref BigInteger n, 
+        private void GenerateKeys(ref uint p, ref uint q, ref BigInteger n,
             ref BigInteger e, ref BigInteger d)
         {
             LoggingEvent?.Invoke(null, new LogEventArgs($"Начало генерации ключей"));
@@ -346,7 +344,7 @@ sign:
 
                     uint cryptedValue = (uint)MathExtra.ModularExponentiation(code, e, n);
                     cryptedValues.Add(cryptedValue);
-                    
+
                 }
 
                 builder.Add(cryptedValues.ToImmutableArray<uint>());
@@ -414,13 +412,6 @@ sign:
             }
 
             return littleMessage;
-        }
-
-        
-        struct CryptFix
-        {
-            public int NumbeofMessage { get; set; }
-            public int Index { get; set; }
         }
     }
 }
