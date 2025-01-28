@@ -51,7 +51,7 @@ namespace Lab1Models
             {
                 avaibleChars.Add(i);
             }
-            for (char i = '\u0410'; i <= '\u0482'; i++)
+            for (char i = '\u0400'; i <= '\u052F'; i++)
             {
                 avaibleChars.Add(i);
             }
