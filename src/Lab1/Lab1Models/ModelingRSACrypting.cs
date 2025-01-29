@@ -231,7 +231,9 @@ sign:
             {
                 MathExtra.ExtendedEvklidAlgorithm(d, eln, out BigInteger x, out BigInteger y);
 
-
+                //Так как коофициент x может быть отрицательным,
+                //то для получения положительного e выпоняют это уравнение
+                //Запись "x % eln + eln" равносильна "x + eln" при x < 0
                 e = (x % eln + eln) % eln;
 
                 //Возможны ситуации, когда алгоритм находит 

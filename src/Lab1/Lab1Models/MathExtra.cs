@@ -181,23 +181,6 @@ namespace Lab1Models
             y = x1 - (a / b) * y1;
 
             return gcd;
-
-            /*
-            // Если b равно 0, то НОД равен a, и x = 1, y = 0 (a*1+0*0=a)
-            if (b == 0)
-            {
-                x = 1;
-                y = 0;
-                return a;
-            }
-
-            // Рекурсивный вызов для b и a % b
-            BigInteger gcd = ExtendedEvklidAlgorithm(b, a % b, out BigInteger x1, out BigInteger y1);
-            // Обновляем x и y по обратной подстановке
-            x = y1;
-            y = x1 - (a / b) * y1;
-            return gcd;
-            */
         }
 
         /// <summary>
