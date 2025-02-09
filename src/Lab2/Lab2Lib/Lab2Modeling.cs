@@ -7,11 +7,11 @@ using System.Numerics;
 
 namespace Lab2Lib
 {
-    public class Lab2Modeling
+    public static class Lab2Modeling
     {
-        private List<char> chars;
+        private static List<char> chars;
 
-        public Lab2Modeling()
+        static Lab2Modeling()
         {
             chars = new List<char>(32);
 
@@ -23,7 +23,7 @@ namespace Lab2Lib
             chars.Add(' ');
         }
 
-        public string Crypt(string openText, int k)
+        public static string Crypt(string openText, int k)
         {
             if (openText.Length == 0 || openText == null)
                 throw new Exception("Нет октрытого текста");
@@ -50,7 +50,7 @@ namespace Lab2Lib
             return builder.ToString();
         }
 
-        public string Decrypt(string cryptedMessage, int k)
+        public static string Decrypt(string cryptedMessage, int k)
         {
             if (cryptedMessage.Length == 0 || cryptedMessage == null)
                 throw new Exception("Нет сообщения для дешифрования");
@@ -72,7 +72,7 @@ namespace Lab2Lib
             return builder.ToString();
         }
 
-        public int[] CheckGamma(int k, int countofElements = 100)
+        public static int[] CheckGamma(int k, int countofElements = 100)
         {
             int[] res = new int[countofElements];
 
@@ -84,7 +84,7 @@ namespace Lab2Lib
             return res;
         }
 
-        public int PeriodAnalizer(int[] vals)
+        public static int PeriodAnalizer(int[] vals)
         {
             if (vals == null || vals.Length == 0)
                 throw new Exception("Нет массива для проверки или он равень нулю");
