@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KeysGet.cs" />
     <Compile Include="Lab2Modeling.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

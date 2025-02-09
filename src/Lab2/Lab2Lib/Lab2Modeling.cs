@@ -23,8 +23,6 @@ namespace Lab2Lib
             chars.Add(' ');
         }
 
-        //public string OpenText { get; set; } = "";
-
         public string Crypt(string openText, int k)
         {
             if (openText.Length == 0 || openText == null)
