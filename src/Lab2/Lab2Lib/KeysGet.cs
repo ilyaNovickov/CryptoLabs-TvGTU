@@ -22,11 +22,9 @@ namespace Lab2Lib
 
             decryptedMessages = new List<string>(1);
 
-            Lab2Modeling lab = new Lab2Modeling();
-
             for (int k = lower; k <= upper; k++)
             {
-                string str = lab.Decrypt(cryptedText, k);
+                string str = Lab2Modeling.Decrypt(cryptedText, k);
 
                 if (AnalizePreposition(str))
                 {

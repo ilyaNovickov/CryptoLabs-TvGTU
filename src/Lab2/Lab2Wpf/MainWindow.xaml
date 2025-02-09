@@ -4,9 +4,60 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Lab2Wpf"
+        xmlns:vm="clr-namespace:Lab2Wpf.ViewModel"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+    <Window.DataContext>
+        <vm:MainWidowViewModel/>
+    </Window.DataContext>
+    <TabControl>
+        <TabItem Header="Расшифрование">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="0">
+                    <ToolBar DockPanel.Dock="Top">
+                        <Button Content="Попытка расшифровать" Command="{Binding AnalizeAllKeysCommad}"/>
+                        <Button Content="Попытка расшифровать по предлогам" Command="{Binding AnalizeDecryptedMessageCommand}"/>
+                    </ToolBar>
+                    <ToolBar DockPanel.Dock="Top">
+                        <Label Content="Нижняя граница ключа"/>
+                        <TextBox Text="{Binding LowBound, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Label Content="Вверхняя граница ключа"/>
+                        <TextBox Text="{Binding UpperBound, UpdateSourceTrigger=PropertyChanged}"/>
+                    </ToolBar>
+                    <TextBox Text="{Binding CryptedMessage, UpdateSourceTrigger=PropertyChanged}"/>
+                </DockPanel>
+                <ListBox Grid.Column="1" ItemsSource="{Binding DecryptedMessages}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="Black" BorderThickness="1">
+                                <StackPanel>
+                                    <Label Content="{Binding K}"/>
+                                    <TextBox Text="{Binding Str}" IsReadOnly="True"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Проверка gamma">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0">
+                    <Label Content="Значение gamma = "/>
+                    <TextBox Text="10"/>
+                </StackPanel>
+                <Label Grid.Row="1" Content="Период : "/>
+                <ListBox Grid.Row="2"/>
+            </Grid>
+        </TabItem>
+    </TabControl>
 </Window>
