@@ -13,13 +13,15 @@ namespace Lab2Lib
             "ПРИ",
             "ЧЕРЕЗ", "С", "У", "ЗА", "НАД", "ОБ", "ПОД", "ПРО", "ДЛЯ" };
 
-        public static IEnumerable<int> AnalizeKeys(string cryptedText, int lower, int upper)
+        public static IEnumerable<int> AnalizeKeys(string cryptedText, int lower, int upper, out List<string> decryptedMessages)
         {
             if (lower > upper)
                 throw new Exception("Нижняя граница ключа не может быть больше вверхней");
 
             List<int> keys = new List<int>(1);
-            
+
+            decryptedMessages = new List<string>(1);
+
             Lab2Modeling lab = new Lab2Modeling();
 
             for (int k = lower; k <= upper; k++)
@@ -27,7 +29,10 @@ namespace Lab2Lib
                 string str = lab.Decrypt(cryptedText, k);
 
                 if (AnalizePreposition(str))
+                {
                     keys.Add(k);
+                    decryptedMessages.Add(str);
+                }
             }
 
             return keys;
