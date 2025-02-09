@@ -47,16 +47,19 @@
         <TabItem Header="Проверка gamma">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0">
-                    <Label Content="Значение gamma = "/>
-                    <TextBox Text="10"/>
+                    <Label Content="Значение k = "/>
+                    <TextBox Text="{Binding K, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Label Content="Значение длины сообщения n = "/>
+                    <TextBox Text="{Binding N, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Content="Проверка" Command="{Binding GetPeriodCommand}"/>
                 </StackPanel>
-                <Label Grid.Row="1" Content="Период : "/>
-                <ListBox Grid.Row="2"/>
+                <Label Grid.Row="1" Content="{Binding Period, StringFormat=Период : {0}}  "/>
+                <ListBox Grid.Row="2" ItemsSource="{Binding PeriodVals}"/>
             </Grid>
         </TabItem>
     </TabControl>

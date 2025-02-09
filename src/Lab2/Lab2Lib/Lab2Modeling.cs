@@ -84,6 +84,18 @@ namespace Lab2Lib
             return res;
         }
 
+        public static int PeriodAnalizer(int k, int n, out int[] vals)
+        {
+            vals = new int[n+1];
+
+            for (int i = 0; i <= n; i++)
+            {
+                vals[i] = (int)ModularExponentiation((BigInteger)k, (BigInteger)i, (BigInteger)32);
+            }
+
+            return PeriodAnalizer(vals);
+        }
+
         public static int PeriodAnalizer(int[] vals)
         {
             if (vals == null || vals.Length == 0)

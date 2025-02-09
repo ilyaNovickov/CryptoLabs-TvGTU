@@ -22,9 +22,15 @@ namespace Lab2Wpf.ViewModel
     {
         private ICommand analizeDecryptedMessage;
         private ICommand analazeAllKeys;
+        private ICommand getPeriodCommand;
         private string cryptedMessage = null;
         private int lowBound = 0;
         private int upperBound = 32;
+        private int period = 0;
+        private int[] periodVals = null;
+
+        private int k = 1;
+        private int n = 1;
 
         public string CryptedMessage 
         {
@@ -38,12 +44,52 @@ namespace Lab2Wpf.ViewModel
         public ObservableCollection<Turple> DecryptedMessages { get; set; }
             = new ObservableCollection<Turple>();
 
+        public int Period
+        {
+            get => period;
+            set => SetProperty(ref period, value);
+        }
+
+        public int[] PeriodVals
+        {
+            get => periodVals;
+            set => SetProperty(ref periodVals, value);
+        }
+
+        public int K
+        {
+            get => k;
+            set
+            {
+                if (!(value is int))
+                    return;
+                if (value < 0 || value > 32)
+                    return;
+                SetProperty(ref k, value);
+            }
+        }
+
+        public int N
+        {
+            get => n;
+            set
+            {
+                if (!(value is int))
+                    return;
+                if (value < 0)
+                    return;
+                SetProperty(ref n, value);
+            }
+        }
+
         public int LowBound
         {
             get => lowBound;
             set
             {
                 if (!(value is int))
+                    return;
+                if (value < 0 || value > 32)
                     return;
                 SetProperty(ref lowBound, value);
             }
@@ -56,8 +102,15 @@ namespace Lab2Wpf.ViewModel
             {
                 if (!(value is int))
                     return;
+                if (value < 0 || value > 32)
+                    return;
                 SetProperty(ref upperBound, value);
             }
+        }
+
+        public ICommand GetPeriodCommand
+        {
+            get => getPeriodCommand ?? (getPeriodCommand = new RelayCommand(GetPeriod));
         }
 
         public ICommand AnalizeDecryptedMessageCommand
@@ -136,5 +189,12 @@ namespace Lab2Wpf.ViewModel
                 });
             }
         }
+
+        private void GetPeriod()
+        {
+            Period = Lab2Modeling.PeriodAnalizer(k, n, out int[] vals);
+            PeriodVals = vals;
+        }
+
     }
 }
