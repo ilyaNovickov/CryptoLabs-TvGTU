@@ -1,0 +1,89 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:LabAvalApp.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="LabAvalApp.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="LabAvalApp">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+	<DockPanel LastChildFill="True">
+		<ToolBar DockPanel.Dock="Top">
+			<Button Content="Сгенерировать ключи" Command="{Binding KeysGenerateCommand}" Margin="5,5,5,5"/>
+			<Button Content="Шифровать" Command="{Binding SendCommand}" Margin="5,5,5,5" IsEnabled="{Binding KeysGenerated}"/>
+			<Button Content="Дешифровать" Command="{Binding DecrypteCommand}" Margin="5,5,5,5"/>
+		</ToolBar>
+		<StatusBar DockPanel.Dock="Bottom">
+			<TextBlock Text="{Binding StringFormat='P = {0} |', Path=P}"/>
+			<TextBlock Text="{Binding StringFormat='Q = {0} |', Path=Q}"/>
+			<TextBlock Text="{Binding StringFormat='N = {0} |', Path=N}"/>
+			<TextBlock Text="{Binding StringFormat='E = {0} |', Path=E}"/>
+			<TextBlock Text="{Binding StringFormat='D = {0} |', Path=D}"/>
+		</StatusBar>
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition/>
+				<RowDefinition/>
+			</Grid.RowDefinitions>
+			<Grid Grid.Row="0">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition/>
+					<ColumnDefinition Width="0.5*"/>
+					<ColumnDefinition/>
+				</Grid.ColumnDefinitions>
+				<Grid Grid.Column="0">
+					<Grid.RowDefinitions>
+						<RowDefinition/>
+						<RowDefinition Height="0.2*"/>
+					</Grid.RowDefinitions>
+					<GroupBox Header="Сообщение" Grid.Row="0">
+						<TextBox TextWrapping="NoWrap"
+                         AcceptsReturn="True"
+                         HorizontalScrollBarVisibility="Visible"
+                         VerticalScrollBarVisibility="Visible"
+                         Text="{Binding MessageToCrypt, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="{Binding MaxMessageLength}"/>
+					</GroupBox>
+					<StackPanel Grid.Row="1" Orientation="Vertical">
+						<TextBlock Text="{Binding StringFormat='Длина сообщения \{0\,5}\ символов', Path=MessageToCrypt.Length}"/>
+					</StackPanel>
+				</Grid>
+				<ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Disabled">
+					<ListBox  ItemsSource="{Binding CryptedMessage}">
+						<ListBox.ItemTemplate>
+							<DataTemplate>
+								<ListBox ItemsSource="{Binding}" BorderThickness="3">
+									<ListBox.ItemTemplate>
+										<DataTemplate>
+											<TextBlock Text="{Binding}"/>
+										</DataTemplate>
+									</ListBox.ItemTemplate>
+								</ListBox>
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
+				</ScrollViewer>
+				<GroupBox Grid.Column="2" Header="Дешифрация">
+					<TextBox Text="{Binding DecryptedMessage, Mode=OneWay}" TextWrapping="NoWrap" HorizontalScrollBarVisibility="Visible"
+                             VerticalScrollBarVisibility="Visible" IsReadOnly="True"/>
+				</GroupBox>
+
+			</Grid>
+			<TextBox Grid.Row="1" IsReadOnly="True"
+                     Margin="5,5,5,5" BorderThickness="3"
+                     TextWrapping="NoWrap"
+                     HorizontalScrollBarVisibility="Visible"
+                     VerticalScrollBarVisibility="Visible"
+                     Text="{Binding LogString}"/>
+		</Grid>
+	</DockPanel>
+
+</Window>
